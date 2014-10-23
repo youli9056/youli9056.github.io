@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[秦风汉雨]]></title>
-  <link href="http://youli9056.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: gc | 秦风汉雨]]></title>
+  <link href="http://youli9056.github.io/blog/categories/gc/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
   <updated>2014-10-23T22:53:16+08:00</updated>
   <id>http://youli9056.github.io/</id>
@@ -33,7 +33,7 @@
 
 <h2>Java 垃圾回收进程</h2>
 
-<p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="http://youli9056.github.io/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
+<p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
 
 <p><strong>Eden Space:</strong>当一个实例被创建的时候，它最初被存放在堆内存空间的年轻代的Eden区中。</p>
 
@@ -72,141 +72,6 @@ Java中有<a href="http://javapapers.com/core-java/java-weak-reference/">多种�
 || 1920 || -10 || 32 ||</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[markdown learn]]></title>
-    <link href="http://youli9056.github.io/blog/markdownlearn/"/>
-    <updated>2014-08-18T01:07:36+08:00</updated>
-    <id>http://youli9056.github.io/blog/markdownlearn</id>
-    <content type="html"><![CDATA[<h1>A First Level Header</h1>
-
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.
-Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
-
-<h2>A Second Level Header</h2>
-
-<p>Now is the time for all good men to come to the aid of their country,
-This is just a regular paragraph.</p>
-
-<p>The quick brown fox jumped over the lazy dog&rsquo;s back.</p>
-
-<h3>Header 3</h3>
-
-<blockquote><p>This is a blockquote.</p>
-
-<p>This is the second paragraph in the blockquote.</p>
-
-<p>This is an H2 in a blockquote</p></blockquote>
-
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.
-Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
-
-<h3>Lists</h3>
-
-<h4>无序列表</h4>
-
-<p>无序列表使用星号，加号和减号作为列表项目的标记</p>
-
-<h5>星号</h5>
-
-<ul>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>加号</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>减号</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>混合使用</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-由上面的测试可以显示，三者之间是完全等价的（<strong>符号和内容之间要有一个空格</strong>）
-
-<h4>有序列表</h4>
-
-<p>有序列表使用数字接着一个英文句点作为项目标记：</p></li>
-<li>Red</li>
-<li>Green</li>
-<li>Bule
-<strong>句点和内容之间要有一个空格</strong>
-
-<h4>项目之间的空行问题</h4></li>
-<li><p>A list item.</p>
-
-<p>  With multiple paragraphs.</p></li>
-<li><p>Another item in the list.</p></li>
-</ul>
-
-
-<!--more-->
-
-
-<h3>链接</h3>
-
-<p>Markdown有两种链接的语法：行内和参考两种形式，都是使用角括号来把文字转成链接。
-行内形式是直接在后面用括号直接接上链接：
-This is an <a href="http://example.com/">example link</a>.
-也可以选择给链接加上title属性：
-This is an <a href="http://example.com/" title="With a Title which inditicates as a tooltip">titled example link</a>.</p>
-
-<p>参考形式的链接让你可以为链接定一个名称，之后你可以在文件的其他地方定义该链接的内容：
-I get 10 times more traffic from <a href="http://google.com/" title="Google">Google</a> than from
-<a href="http://search.yahoo.com/" title="Yahoo Search">Yahoo</a> or <a href="http://search.msn.com/" title="MSN Search">MSN</a>.</p>
-
-<p>title 属性是选择性的，链接名称可以用字母、数字和空格，但是不分大小写：</p>
-
-<p>I start my morning with a cup of coffee and
-<a href="http://www.nytimes.com/">The New York Times</a>.</p>
-
-<h4>图片</h4>
-
-<p>图片的语法和链接很像。
-行内形式（title是可选择的）：</p>
-
-<p><img src="http://youli9056.github.io/images/markdownlearn/keyboardcat.gif" title="Cat" alt="我的照片" /></p>
-
-<p>参考形式：</p>
-
-<p><img src="http://youli9056.github.io/images/markdownlearn/keyboardcat.gif" title="Cat cat" alt="my picture" /></p>
-
-<h6>注意点</h6>
-
-<blockquote><p>链接的路径，最好设置成/images/blogname/picturefilename.jpg,绝对路径</p>
-
-<p>参考形式的冒号和路径之间要有个空格</p></blockquote>
-
-<h4>代码</h4>
-
-<p>在一般段落文字中，可以使用反引号 ` 来标记代码区段，区段的<code>&amp;</code>、<code>&lt;</code>、<code>&gt;</code>都会被自动转换成HTML实体，反引号可以很容易在代码区段中插入HTML代码：</p>
-
-<p>I strongly recommend against using any <code>&lt;blink&gt;</code> tags.</p>
-
-<p>I wish SmartyPants used named entities like <code>&amp;mdash;</code>
-instead of decimal-encoded entites like <code>&amp;#8212;</code>.</p>
-
-<p>如果要建立一个已经格式化好的代码区块，只要每行都缩进 4 个空格或是一个 tab 就可以了，而 &amp;、&lt; 和 > 也一样会自动转成 HTML 实体。</p>
-
-<p>If you want your page to validate under XHTML 1.0 Strict,
-you&rsquo;ve got to put paragraph tags in your blockquotes:</p>
-
-<pre><code>&lt;blockquote&gt;
-&lt;p&gt;For example.&lt;/p&gt;
-&lt;/blockquote&gt;
-</code></pre>
 ]]></content>
   </entry>
   
