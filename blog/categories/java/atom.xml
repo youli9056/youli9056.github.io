@@ -4,7 +4,7 @@
   <title><![CDATA[Category: java | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-10-23T22:53:16+08:00</updated>
+  <updated>2014-11-04T15:26:23+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -34,6 +34,9 @@
 <h2>Java 垃圾回收进程</h2>
 
 <p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
+
+<!--more-->
+
 
 <p><strong>Eden Space:</strong>当一个实例被创建的时候，它最初被存放在堆内存空间的年轻代的Eden区中。</p>
 
@@ -65,13 +68,121 @@
 <ul>
 <li>所有不能被活着的线程到达实例</li>
 <li>不能被其他对象到达的循环引用对象
-Java中有<a href="http://javapapers.com/core-java/java-weak-reference/">多种不同的引用类型</a>。实例的可回收性取决于它的引用类型。
-|| <em>Year</em> || <em>Temperature (low)</em> || <em>Temperature (high)</em> ||
-|| 1900 || -10 || 25 ||
-|| 1910 || -15 || 30 ||
-|| 1920 || -10 || 32 ||</li>
+Java中有<a href="http://javapapers.com/core-java/java-weak-reference/">多种不同的引用类型</a>。实例的可回收性取决于它的引用类型。</li>
 </ul>
 
+
+<table>
+<thead>
+<tr>
+<th> Reference   </th>
+<th> Garbage Collection </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Strong Refrence </td>
+<td> 不被垃圾回收   </td>
+</tr>
+<tr>
+<td> Soft Reference </td>
+<td> 作为最后的选择，有可能被回收</td>
+</tr>
+<tr>
+<td> Weak Reference </td>
+<td> 可以被垃圾回收 </td>
+</tr>
+<tr>
+<td> Phantom Reference </td>
+<td> 可以被垃圾回收</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>在编译过程中Java编译器有个优化机制，编译器可以选择将<code>null</code>赋值给一个实例，这样就将这个实例标志为可被回收的。</p>
+
+<pre><code>class Animal {
+    public static void main(String[] args) {
+        Animal lion = new Animal();
+        System.out.println("Main is completed.");
+    }
+
+    protected void finalize() {
+        System.out.println("Rest in Peace!");
+    }
+}
+</code></pre>
+
+<p>在上面这个类中，实例<code>lion</code>在除了初始化那一行在其他地方都没有被使用到。因此作为一种优化方法，Java编译器可以在初始化那一行后面立即赋值<code>lion = null</code>。这样finlizer可能会在Main方法的SOP之前打印结果。</p>
+
+<pre><code>Rest in Peace！
+Main is completed.
+</code></pre>
+
+<p>但结果的顺序是不确定的，它取决于JVM的实现以及运行时的内存使用情况。从中我们能知道的一点是：编译器在发现一个实例的之后的程序中不再被引用时可以选择提前释放实例内存。</p>
+
+<ul>
+<li>这里有个实例何时变成可回收更好的例子。实例所有的属性可以被存储在寄存器中之后可以从寄存器中读取这些属性值，且未来在任何情况下都不会将值写回到实例对象中。这样尽管这个实例在未来还是被使用到了，但是实例对象依然可以被标记为可回收的。</li>
+<li>何时能被垃圾回收可以简单到仅仅认为在赋值为null的时候也可以复杂到如上面那一点所说的那样。JVM的实现者会做一些取舍。其目标都是希望留下最少的痕迹，提高响应时间增大吞吐量。为了能够达到这些目的，JVM实现者可以在垃圾回收中选择更好的模式或算法来回收内存。</li>
+<li>当<code>finalize()</code>被调用的时候，JVM释放掉当前线程的所有同步块。</li>
+</ul>
+
+
+<p><strong>Example Program for GC Scope</strong></p>
+
+<pre><code>class GCScope {
+    GCScope t;
+    static int i = 1;
+    public static void main(String args[]) {
+        GCScope t1 = new GCScope();
+        GCScope t2 = new GCScope();
+        GCScope t3 = new GCScope();
+        //没有任何一个对象是可以被GC的
+        t1.t = t2;//没有任何一个对象是可以被GC的
+        t2.t = t3;//没有任何一个对象是可以被GC的
+        t3.t = t1;//没有任何一个对象是可以被GC的
+
+        t1 = null;//没有任何一个对象是可以被GC的,t3.t还有对t1的引用
+
+        t2 = null;//没有任何一个对象是可以被GC的,t3.t.t还有对t2的引用
+        t3 = null;//所有3个对象都可以被GC(没有一个被引用了）
+                  //只有各个对象的变量t互相循环引用形成了一个孤立的引用环，而没有外部引用
+    }
+    protected void finalize() {
+        System.out.println("Garbage collected from boject" + i);
+        i++;
+    }
+}
+</code></pre>
+
+<p><strong>Example Program for GC OutOfMemoryError</strong></p>
+
+<p>垃圾回收机制并不保证发生内存溢出时的安全，事实上内存溢出将会导致程序的崩溃，抛出<code>OutOfMemoryError</code>。</p>
+
+<pre><code>import java.util.LinkedList;
+import java.util.List;
+
+public class GC {
+    public static void main(String[] args[]) {
+        List l = new LinkedList();
+        //进入内部无限循环直接向链表中不断添加元素
+        do {
+            l.add(new String("Hello, World!");
+        } while (true);
+    }
+}
+</code></pre>
+
+<p><em>Output</em></p>
+
+<pre><code>Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+    at java.util.LinkedList.linkLast(LinkedList.java:142)
+    at java.util.LinkedList.add(LinkedList.java:338)
+    at com.javapapers.java.GCScope.main(GCScope.java:12)
+</code></pre>
+
+<p>下面将会将垃圾回收系列文章的第三部分：<a href="http://javapapers.com/java/types-of-java-garbage-collectors/">Different types of Java garbage collectors avaliable</a></p>
 ]]></content>
   </entry>
   

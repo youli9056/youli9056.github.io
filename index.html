@@ -7,8 +7,7 @@
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="本文并非原创，翻译自文章How Java Garbage Collection Works?
-这篇文章的主要目的是来理解Java垃圾回收机制的基本原理以及它是如何工作的。这是垃圾回收机制系列文章的第二篇。希望您已经读过了第一部分Java垃圾回收导论. &hellip;">
+	<meta name="description" content="there is some interesting saying, when problems came out Bushit, that&rsquo;s impossible! It&rsquo;s okay on my mechine! It shouldn&rsquo;t&hellip; &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -84,6 +83,61 @@
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/do-not-say-these-words-when-debuging/">
+		
+			Do Not Say These Words When Debuging</a>
+	</h2>
+	<div class="entry-content">
+		<p>there is some interesting saying, when problems came out</p>
+
+<blockquote><p>Bushit, that&rsquo;s impossible!</p>
+
+<p>It&rsquo;s okay on my mechine!</p>
+
+<p>It shouldn&rsquo;t&hellip;</p>
+
+<p>It must be someone else&rsquo;s problem!</p>
+
+<p>Why it&rsquo;s ok previously?</p></blockquote>
+
+<p>HHHHHaaaa!</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-04T10:25:23+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/fun/'>fun</a>, <a class='category' href='/blog/categories/note/'>note</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/do-not-say-these-words-when-debuging/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/java-gc-yuan-li/">
 		
 			Java 垃圾回收机制工作原理&#8211;How Java Garbage Collection Works?</a>
@@ -106,46 +160,9 @@
 
 <p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
 
-<p><strong>Eden Space:</strong>当一个实例被创建的时候，它最初被存放在堆内存空间的年轻代的Eden区中。</p>
-
-<p><em>注意：如果您不太理解这些术语，建议您先看下介绍内存模型、JVM架构及这些术语的详细解释的文章：<a href="http://javapapers.com/java/java-garbage-collection-introduction/">garbage-collection-introduction-tutorial</a></em></p>
-
-<p><strong>Survivor Space(S0 和S1):</strong>作为minor回收周期的一部分，还活着的对象（还有引用指向它）被从eden区中移动到survivor空间S0。同样的，垃圾回收器扫描S0并将活着的实例移动到S1。</p>
-
-<p>无用的对象（没有引用指向）被标记并回收。垃圾回收器（有四种可用的垃圾回收器，将在下一篇文章中介绍）决定这些被标记的实例是在扫描的过程中移出内存还是在另外独立的迁移进程中执行。</p>
-
-<p><strong>Old Generation:</strong>老年代或者永久代是堆内存的第二个逻辑部分。当垃圾回收器在做minor GC周期中，S1 survivor区中还活着的实例会被提升到老年代中。S1区中不再被引用的对象被标记并清除。</p>
-
-<p><strong>Major GC:</strong>在Java垃圾回收过程中实例生命周期的最后一个阶段。Major GC在垃圾回收过程中扫描属于Old Generation部分的堆内存。如果实例没有被任何引用关联，它们将被标记、清除；如果它们还被引用关联着，则将继续存留在old generation。</p>
-
-<blockquote><p><strong>Memory Fragmentation:</strong>一旦实例从堆内存中删除了，它们原来的位置将空出来给以后分配实例使用。显然这些空闲空间很容易在内存空间中产生碎片。为了能够更快地分配实例地址，需要对内存做去碎片化操作。根据不同垃圾回收器的策略，被回收的内存将在回收的过程同时或者在GC另外独立的过程中压缩整合。</p></blockquote>
-
-<h2>垃圾回收过程中的对象销毁&ndash;Finalization</h2>
-
-<p>就在移除一个对象并回收它的内存空间之前，Java垃圾回收器将会调用各个实例的<code>finalize()</code>方法，这样实例对象就有机会可以释放掉它占用的资源。尽管<code>finalize()</code>方法是保证在回收内存空间之前执行的，但是对具体的执行时间和执行顺序是没有任何保证的。多个实例之间的<code>finalize()</code>执行顺序是不能提前预知的，甚至有可能它们是并行执行的。程序不应该预先假设实例执行<code>finalize()</code>的方法，也不应该使用<code>finalize()</code>方法来回收资源。</p>
-
-<ul>
-<li>在finalize过程中抛出的任何异常都默认被忽略掉了，同时对象的销毁过程被取消</li>
-<li>JVM规范并没有讨论关于弱引用的垃圾回收，这是明确声明的。具体的细节留给实现者决定。</li>
-<li>垃圾回收是由守护进程执行的</li>
-</ul>
-
-
-<h2>对象何时变成可被垃圾回收的？</h2>
-
-<ul>
-<li>所有不能被活着的线程到达实例</li>
-<li>不能被其他对象到达的循环引用对象
-Java中有<a href="http://javapapers.com/core-java/java-weak-reference/">多种不同的引用类型</a>。实例的可回收性取决于它的引用类型。
-|| <em>Year</em> || <em>Temperature (low)</em> || <em>Temperature (high)</em> ||
-|| 1900 || -10 || 25 ||
-|| 1910 || -15 || 30 ||
-|| 1920 || -10 || 32 ||</li>
-</ul>
-
 
 		
-		
+		<a href="/blog/java-gc-yuan-li/" class="more-link">Read on &rarr;</a>
 	</div>
 
 

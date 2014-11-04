@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: fun | 秦风汉雨]]></title>
+  <link href="http://youli9056.github.io/blog/categories/fun/atom.xml" rel="self"/>
+  <link href="http://youli9056.github.io/"/>
+  <updated>2014-11-04T15:26:23+08:00</updated>
+  <id>http://youli9056.github.io/</id>
+  <author>
+    <name><![CDATA[You Li]]></name>
+    <email><![CDATA[youli9056@126.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[do not say these words when debuging]]></title>
+    <link href="http://youli9056.github.io/blog/do-not-say-these-words-when-debuging/"/>
+    <updated>2014-11-04T10:25:23+08:00</updated>
+    <id>http://youli9056.github.io/blog/do-not-say-these-words-when-debuging</id>
+    <content type="html"><![CDATA[<p>there is some interesting saying, when problems came out</p>
+
+<blockquote><p>Bushit, that&rsquo;s impossible!</p>
+
+<p>It&rsquo;s okay on my mechine!</p>
+
+<p>It shouldn&rsquo;t&hellip;</p>
+
+<p>It must be someone else&rsquo;s problem!</p>
+
+<p>Why it&rsquo;s ok previously?</p></blockquote>
+
+<p>HHHHHaaaa!</p>
+]]></content>
+  </entry>
+  
+</feed>
