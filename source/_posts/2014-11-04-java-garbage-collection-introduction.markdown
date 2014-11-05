@@ -12,8 +12,8 @@ categories: [gc,java,jvm]
 
 1. [Java垃圾回收简介](/blog/java-garbage-collection-introduction/)
 2. [Java垃圾回收器是如何工作的？](/blog/java-gc-yuan-li/)
-3. 各种类型的Java垃圾回收器
-4. Java垃圾回收的监控和分析
+3. [各种类型的Java垃圾回收器](/blog/types-of-java-garbage-collectors)
+4. [Java垃圾回收的监控和分析](/blog/monitoring-and-analyzing-java-garbage-collection)
 
 本文是这个系列的第一篇文章，这篇文章将会介绍一些基本术语，如：JDK，JVM，JRE，HotSpot VM，以及理解JVM的架构和Java堆内存结构。在开始学习Java垃圾回收机制之前确实有必要了解一下这些基本东西。
 

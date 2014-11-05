@@ -25,8 +25,8 @@ categories: [gc,java,jvm]
 
 ##Java HotSpot虚拟机
 
-每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并成一个。
-
+每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并。
+<!--more-->
 HotSpot虚拟机是Oracle标准版平台的核心组成部分。在本垃圾回收系列文章中我们将通过HotSpot虚拟机来了解垃圾回收的基本准则。
 
 ##JVM 架构
