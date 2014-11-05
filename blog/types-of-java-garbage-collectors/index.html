@@ -1,0 +1,320 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Types of Java Garbage Collectors - 秦风汉雨</title>
+	<meta name="author" content="You Li">
+
+	
+	<meta name="description" content="本文是Java垃圾回收系列的第三篇，非原创，翻译自Types of Java Garbage Collectors。如果没有相应基础的话，阅读本文前建议先阅读前两篇Java Garbage Collection Introduction(介绍了JVM的架构，堆内存模型和周边相关的Java术语) &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="秦风汉雨" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">秦风汉雨</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:youli9056.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/102695714494549586316?rel=author" title="Google+">Google+</a>
+		
+		
+		
+		<a class="github" href="https://github.com/youli9056" title="GitHub">GitHub</a>
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:youli9056.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Types of Java Garbage Collectors</h2>
+	<div class="entry-content"><p>本文是Java垃圾回收系列的第三篇，非原创，翻译自<a href="http://javapapers.com/java/types-of-java-garbage-collectors/">Types of Java Garbage Collectors</a>。如果没有相应基础的话，阅读本文前建议先阅读前两篇<a href="/blog/java-garbage-collection-introduction/">Java Garbage Collection Introduction</a>(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和<a href="/blog/java-gc-yuan-li/">How Java Garbage Collection Works?</a>(概况介绍了GC是如何工作的)</p>
+
+<p>本文将会介绍各种不同类型的Java垃圾回收器。垃圾回收是Java用来将程序员从分配和释放内存的琐事中解放出来的自动过程。</p>
+
+<p>Java有四种类型的垃圾回收器，</p>
+
+<ol>
+<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a>
+
+<ol>
+<li><a href="#parallel-garbage-collector">Parallel Garbage Collector</a></li>
+<li><a href="#cms-garbage-collector">CMS Garbage Collector</a></li>
+<li><a href="#g1-garbage-collector">G1 Garbage Collector</a></li>
+</ol>
+</li>
+</ol>
+
+
+<p><img src="/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" /></p>
+
+<p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
+
+<h2>1. Serial Garbage Collector</h2>
+
+<p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
+
+<p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
+
+<h2>2. Parallel Garbage Collector</h2>
+
+<p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
+
+<h2>3. CMS Garbage Collector</h2>
+
+<p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
+
+<ol>
+<li>在老年代中标记引用对象的时候</li>
+<li>在做垃圾回收的过程中堆内存中有变化发生</li>
+</ol>
+
+
+<p>对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。</p>
+
+<p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
+
+<h2>4. G1 Garbage Collector</h2>
+
+<p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
+
+<p>使用<code>-XX:UseG1GC</code>JVM参数来开启使用G1垃圾回收器。</p>
+
+<p><strong>Java 8 的优化</strong></p>
+
+<p>在使用G1垃圾回收器是，开启使用<code>-XX:+UseStringDeduplacaton</code>JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是<em>Java 8 u 20</em>引入的选项。</p>
+
+<p>以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。</p>
+
+<h2>Garbage Collection JVM Options</h2>
+
+<p>下面是些主要的与Java垃圾回收相关的JVM选项。</p>
+
+<h3>Type of Garbage Collector to run</h3>
+
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-XX:+UseSerialGC</td>
+<td>串行垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:+UseParallelGC</td>
+<td>并行垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:+UseConcMarkSweepGC</td>
+<td>CMS垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:ParallesCMSThread=</td>
+<td>CMS垃圾回收器&ndash;使用的线程数量</td>
+</tr>
+<tr>
+<td>-XX:UseG1GC</td>
+<td>G1垃圾回收器</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>GC 优化选项</h3>
+
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-Xms</td>
+<td>初始堆内存大小</td>
+</tr>
+<tr>
+<td>-Xmx</td>
+<td>最大堆内存大小</td>
+</tr>
+<tr>
+<td>-Xmn</td>
+<td>年轻代的大小</td>
+</tr>
+<tr>
+<td>-XX:PermSize</td>
+<td>初始永久代的大小</td>
+</tr>
+<tr>
+<td>-XX:MaxPermSize</td>
+<td>最大的永久代的大小</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>Example Usage of JVM GC Options</h3>
+
+<pre><code>java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
+</code></pre>
+
+<p>在垃圾回收系列的<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">下一篇</a>中，将通过一个例子介绍如何区监控和分析垃圾回收。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-05T11:07:33+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
+
+
+</div>
+	
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		
+		
+	</div>
+	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    You Li
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+<script type="text/javascript">
+      var disqus_shortname = 'youli9056githubio';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://youli9056.github.io/blog/types-of-java-garbage-collectors/';
+        var disqus_url = 'http://youli9056.github.io/blog/types-of-java-garbage-collectors/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+	<script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(['_setAccount', 'UA-55942851-1']);
+		_gaq.push(['_trackPageview']);
+
+		(function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+
+
+
+	<!--返回顶部开始-->
+<div id="full" style="width:0px; height:0px; position:fixed; right:180px; bottom:150px; z-index:100; text-align:center; background-color:transparent; cursor:pointer;">
+        <a href="#" onclick="goTop();return false;"><img src="/images/top.png" border=0 alt="返回顶部"></a>
+</div>
+<script src="/javascripts/top.js" type="text/javascript"></script>
+<!--返回顶部结束-->
+
+</body>
+</html>

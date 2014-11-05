@@ -7,8 +7,7 @@
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="本文非原创，翻译自Java Garbage Collection introduction
-在Java中为对象分配和释放内存空间都是由垃圾回收线程自动执行完成的。和C语言不一样的是Java程序员不需要手动写垃圾回收相关的代码。这是使得Java如此流行， &hellip;">
+	<meta name="description" content="在这篇Java垃圾回收系列文章中，让我们看下一些监控和分析垃圾回收的工具。然后用工具尝试监控和分析一个例子。初学者最好先看下此系列,从Java 垃圾回收简介开始吧。 Java垃圾回收监控和分析工具 下面是一些监控工具，它们有各自的优缺点。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -84,6 +83,300 @@
     <article class="post">
 	<h2 class="title">
 		
+		<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">
+		
+			Monitoring and Analyzing Java Garbage Collection</a>
+	</h2>
+	<div class="entry-content">
+		<p>在这篇Java垃圾回收系列文章中，让我们看下一些监控和分析垃圾回收的工具。然后用工具尝试监控和分析一个例子。初学者最好先看下<a href="/blog/categories/gc/">此系列</a>,从<a href="/blog/java-garbage-collection-introduction">Java 垃圾回收简介</a>开始吧。</p>
+
+<h2>Java垃圾回收监控和分析工具</h2>
+
+<p>下面是一些监控工具，它们有各自的优缺点。我们可以通过选择恰当的工具做一些有序的分析工作来提升应用性能。这篇文章将从Java VisualVM开始讲起。</p>
+
+<ul>
+<li>Java VisualVM</li>
+<li>Naarad</li>
+<li>GCViewer</li>
+<li>IBM Pattern Modeling and Analysis Tool for Java Garbage Collector</li>
+<li>HPjmeter</li>
+<li>IBM Monitoring and Diagnostic Tools for Java &ndash; Garbage Collection and Memory</li>
+<li>Visualizer</li>
+<li>Verbose GC Analyzer</li>
+</ul>
+
+
+<h2>Java VisualVM</h2>
+
+<p>Java VisualVM是在Java SE SDK安装时免费提供的。看下你的Java JDK安装目录下的<code>/bin</code>目录，<code>\Java\jdk1.8.0\bin</code>。此目录下有许多其他工具包括javac和java工具，jvisualvm就是其中一个。</p>
+
+<p>Java VisualVM对运行中的Java应用提供了可视化的信息展示。它是很多工具的整合包，像工具JConsole,jstat,jinfo,jstack以及jmap现在都是Java VisualVM的一部分。</p>
+
+<p>Java VisualVM可以用来
+- 生成和分析堆内存的dump
+- 观察和操作MBeans
+- 监控垃圾回收
+- 内存和CPU性能分析</p>
+
+<h3>1. Launch VisualVM</h3>
+
+<p><code>jvisualvm</code>已经包含在了JDK的bin目录下,如果以设置环境变量path，则可以直接在命令行中运行<code>jvisualvm</code>，将出现如下启动界面</p>
+
+<p><img src="/images/monitoringandanalysisgc/Start-Java-VisualVM.png" alt="starting jvisualvm" /></p>
+
+<p><img src="/images/monitoringandanalysisgc/Java-VisualVM.png" alt="jvisualvm view" /></p>
+
+<h3>2.安装Visual GC插件</h3>
+
+<p>我们需要安装visual GC 插件才能有个堆Java GC线程的漂亮和有价值的视觉感受。在上面的启动界面中点击工具->插件->可用插件->Visual GC</p>
+
+<p><img src="/images/monitoringandanalysisgc/Visual-GC-Plugin.png" alt="visual gc" /></p>
+
+<p>安装。</p>
+
+<h3>3. 监控GC</h3>
+
+<p>现在可以监控<a href="/blog/java-gc-yuan-li/">垃圾回收</a>过程了。开启你的Java应用程序，Java VisualVM会自动检测并将其显示到界面上。在左边“应用程序”面板的“本地”节点下面，所有本地运行的Java应用都会被列举出来。</p>
+
+<p>Java VisualVM自己本身也是一个Java应用程序，因此它自身也被列了出来。作为本文的目的我们将监控VisualVM应用本身的GC过程。</p>
+
+<p>双击“本地”节点下的VisualVM图标。</p>
+
+<p><img src="/images/monitoringandanalysisgc/GC-Analysis.jpg" alt="visualvm gc" /></p>
+
+<p>这样应用程序的监控面板会在右边打开。面板上有多个标签，每个里面展示了与应用程序性能相关的方面。由于我们现在主要关注“Visual GC”，so，点之。</p>
+
+<p><img src="/images/monitoringandanalysisgc/Heap-Memory-Space-Allocation.png" alt="Heap Memory Space Allocation" /></p>
+
+<p>上面的图片显示了Old，Eden，S0，S1使用的内存空间。下面的图表显示了各个部分申请和释放内存的详细信息。它以设定的刷新频率不停地跟新。</p>
+
+<p><img src="/images/monitoringandanalysisgc/GC-Graphs.png" alt="gc graph" /></p>
+
+<p>上图显示的是一个正常运行的程序。当发生内存泄露或者不正常的操作时，可以从图形本身明显地看出来。至少我们可以知道程序中存在和对象内存分配和垃圾回收相关的问题。然后利用其他标签如“Threads”中提供的信息和Thread Dump我们可以缩小发生问题的范围。</p>
+
+<p>在“监视”标签中，我们可以看到以时间线发展的内存使用概况图。这里有个“执行垃圾回收”按钮可以调用垃圾回收过程。
+<img src="/images/monitoringandanalysisgc/Perform-GC.png" alt="perform gc" /></p>
+
+<p>在“抽样器”标签中我们可以开始内存和CPU分析工作。抽样器会实时显示各个实例的使用情况。它可以帮助确定性能问题到底发生在哪里。</p>
+
+<p><img src="/images/monitoringandanalysisgc/Instances-Memory-Allocation.png" alt="instance memory allocation" /></p>
+
+<p>到此为止，关于<a href="/blog/categories/gc/">Java 垃圾回收的系列文章</a>已经完结了。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-05T13:20:34+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/monitoring-and-analyzing-java-garbage-collection/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/types-of-java-garbage-collectors/">
+		
+			Types of Java Garbage Collectors</a>
+	</h2>
+	<div class="entry-content">
+		<p>本文是Java垃圾回收系列的第三篇，非原创，翻译自<a href="http://javapapers.com/java/types-of-java-garbage-collectors/">Types of Java Garbage Collectors</a>。如果没有相应基础的话，阅读本文前建议先阅读前两篇<a href="/blog/java-garbage-collection-introduction/">Java Garbage Collection Introduction</a>(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和<a href="/blog/java-gc-yuan-li/">How Java Garbage Collection Works?</a>(概况介绍了GC是如何工作的)</p>
+
+<p>本文将会介绍各种不同类型的Java垃圾回收器。垃圾回收是Java用来将程序员从分配和释放内存的琐事中解放出来的自动过程。</p>
+
+<p>Java有四种类型的垃圾回收器，</p>
+
+<ol>
+<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a>
+
+<ol>
+<li><a href="#parallel-garbage-collector">Parallel Garbage Collector</a></li>
+<li><a href="#cms-garbage-collector">CMS Garbage Collector</a></li>
+<li><a href="#g1-garbage-collector">G1 Garbage Collector</a></li>
+</ol>
+</li>
+</ol>
+
+
+<p><img src="/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" /></p>
+
+<p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
+
+<h2>1. Serial Garbage Collector</h2>
+
+<p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
+
+<p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
+
+<h2>2. Parallel Garbage Collector</h2>
+
+<p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
+
+<h2>3. CMS Garbage Collector</h2>
+
+<p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
+
+<ol>
+<li>在老年代中标记引用对象的时候</li>
+<li>在做垃圾回收的过程中堆内存中有变化发生</li>
+</ol>
+
+
+<p>对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。</p>
+
+<p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
+
+<h2>4. G1 Garbage Collector</h2>
+
+<p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
+
+<p>使用<code>-XX:UseG1GC</code>JVM参数来开启使用G1垃圾回收器。</p>
+
+<p><strong>Java 8 的优化</strong></p>
+
+<p>在使用G1垃圾回收器是，开启使用<code>-XX:+UseStringDeduplacaton</code>JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是<em>Java 8 u 20</em>引入的选项。</p>
+
+<p>以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。</p>
+
+<h2>Garbage Collection JVM Options</h2>
+
+<p>下面是些主要的与Java垃圾回收相关的JVM选项。</p>
+
+<h3>Type of Garbage Collector to run</h3>
+
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-XX:+UseSerialGC</td>
+<td>串行垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:+UseParallelGC</td>
+<td>并行垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:+UseConcMarkSweepGC</td>
+<td>CMS垃圾回收器</td>
+</tr>
+<tr>
+<td>-XX:ParallesCMSThread=</td>
+<td>CMS垃圾回收器&ndash;使用的线程数量</td>
+</tr>
+<tr>
+<td>-XX:UseG1GC</td>
+<td>G1垃圾回收器</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>GC 优化选项</h3>
+
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-Xms</td>
+<td>初始堆内存大小</td>
+</tr>
+<tr>
+<td>-Xmx</td>
+<td>最大堆内存大小</td>
+</tr>
+<tr>
+<td>-Xmn</td>
+<td>年轻代的大小</td>
+</tr>
+<tr>
+<td>-XX:PermSize</td>
+<td>初始永久代的大小</td>
+</tr>
+<tr>
+<td>-XX:MaxPermSize</td>
+<td>最大的永久代的大小</td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>Example Usage of JVM GC Options</h3>
+
+<pre><code>java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
+</code></pre>
+
+<p>在垃圾回收系列的<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">下一篇</a>中，将通过一个例子介绍如何区监控和分析垃圾回收。</p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-05T11:07:33+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/types-of-java-garbage-collectors/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
 		<a href="/blog/java-garbage-collection-introduction/">
 		
 			Java Garbage Collection Introduction</a>
@@ -97,8 +390,8 @@
 <ol>
 <li><a href="/blog/java-garbage-collection-introduction/">Java垃圾回收简介</a></li>
 <li><a href="/blog/java-gc-yuan-li/">Java垃圾回收器是如何工作的？</a></li>
-<li>各种类型的Java垃圾回收器</li>
-<li>Java垃圾回收的监控和分析</li>
+<li><a href="/blog/types-of-java-garbage-collectors">各种类型的Java垃圾回收器</a></li>
+<li><a href="/blog/monitoring-and-analyzing-java-garbage-collection">Java垃圾回收的监控和分析</a></li>
 </ol>
 
 
@@ -116,38 +409,11 @@
 
 <h2>Java HotSpot虚拟机</h2>
 
-<p>每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并成一个。</p>
+<p>每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并。</p>
 
-<p>HotSpot虚拟机是Oracle标准版平台的核心组成部分。在本垃圾回收系列文章中我们将通过HotSpot虚拟机来了解垃圾回收的基本准则。</p>
-
-<h2>JVM 架构</h2>
-
-<p>下面的这幅图概括了一个JVM中的主要组成。在JVM架构中，堆内存和垃圾回收器这两个部分和垃圾回收相关。堆内存是运行时用来存储实例对象的数据空间，垃圾回收器运行在堆内存上。现在我们大概知道它们是怎样的一个工作模式。<img src="/images/introductiontogc/JVM-Architecture.jpg" alt="JVM 架构图" /></p>
-
-<h2>Java 堆内存</h2>
-
-<p>在Java的内存模型中，最重要的是要了解堆内存的概念。运行时的Java实例对象存储在堆内存空间中。当一个对象不再被引用了，它变成可被从堆内存中回收空间。在垃圾回收的过程中，这些对象将被从堆内存中清除，同时它们的空间也就被回收了。堆内存的空间主要分成了三部分，</p>
-
-<ol>
-<li><p>年轻代</p>
-
-<ol type="a">
-<li>Eden区(所有实例在运行时最初都分配到eden区中)</li>
-<li>S0 Survivor Space(老一些的对象被从eden区移动到S0区，其实是eden区中的对象经过一次对eden区的Young GC还存活的对象被移动到S0)</li>
-<li>S1 Survivor Space(再老一些的对象被从S0区移动到S1区，其实是在Young GC过程中S0区已满，则会将eden区中还存活的对象和S0区中的存活对象移动到S1区中)</li>
-</ol>
-</li>
-<li><p>老年代(经过S0，S1中几轮迭代后还存活的对象被提升到老年代)</p></li>
-<li>永久代(包含一些元数据像类、方法等等)</li>
-</ol>
-
-
-<p><img src="/images/introductiontogc/Java-Heap-Memory.jpg" alt="Java堆内存空间" /></p>
-
-<p><em>更新:永久代在Java8中被去掉了</em></p>
 
 		
-		
+		<a href="/blog/java-garbage-collection-introduction/" class="more-link">Read on &rarr;</a>
 	</div>
 
 
