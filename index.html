@@ -110,61 +110,9 @@
 
 <p>Java VisualVM是在Java SE SDK安装时免费提供的。看下你的Java JDK安装目录下的<code>/bin</code>目录，<code>\Java\jdk1.8.0\bin</code>。此目录下有许多其他工具包括javac和java工具，jvisualvm就是其中一个。</p>
 
-<p>Java VisualVM对运行中的Java应用提供了可视化的信息展示。它是很多工具的整合包，像工具JConsole,jstat,jinfo,jstack以及jmap现在都是Java VisualVM的一部分。</p>
-
-<p>Java VisualVM可以用来
-- 生成和分析堆内存的dump
-- 观察和操作MBeans
-- 监控垃圾回收
-- 内存和CPU性能分析</p>
-
-<h3>1. Launch VisualVM</h3>
-
-<p><code>jvisualvm</code>已经包含在了JDK的bin目录下,如果以设置环境变量path，则可以直接在命令行中运行<code>jvisualvm</code>，将出现如下启动界面</p>
-
-<p><img src="/images/monitoringandanalysisgc/Start-Java-VisualVM.png" alt="starting jvisualvm" /></p>
-
-<p><img src="/images/monitoringandanalysisgc/Java-VisualVM.png" alt="jvisualvm view" /></p>
-
-<h3>2.安装Visual GC插件</h3>
-
-<p>我们需要安装visual GC 插件才能有个堆Java GC线程的漂亮和有价值的视觉感受。在上面的启动界面中点击工具->插件->可用插件->Visual GC</p>
-
-<p><img src="/images/monitoringandanalysisgc/Visual-GC-Plugin.png" alt="visual gc" /></p>
-
-<p>安装。</p>
-
-<h3>3. 监控GC</h3>
-
-<p>现在可以监控<a href="/blog/java-gc-yuan-li/">垃圾回收</a>过程了。开启你的Java应用程序，Java VisualVM会自动检测并将其显示到界面上。在左边“应用程序”面板的“本地”节点下面，所有本地运行的Java应用都会被列举出来。</p>
-
-<p>Java VisualVM自己本身也是一个Java应用程序，因此它自身也被列了出来。作为本文的目的我们将监控VisualVM应用本身的GC过程。</p>
-
-<p>双击“本地”节点下的VisualVM图标。</p>
-
-<p><img src="/images/monitoringandanalysisgc/GC-Analysis.jpg" alt="visualvm gc" /></p>
-
-<p>这样应用程序的监控面板会在右边打开。面板上有多个标签，每个里面展示了与应用程序性能相关的方面。由于我们现在主要关注“Visual GC”，so，点之。</p>
-
-<p><img src="/images/monitoringandanalysisgc/Heap-Memory-Space-Allocation.png" alt="Heap Memory Space Allocation" /></p>
-
-<p>上面的图片显示了Old，Eden，S0，S1使用的内存空间。下面的图表显示了各个部分申请和释放内存的详细信息。它以设定的刷新频率不停地跟新。</p>
-
-<p><img src="/images/monitoringandanalysisgc/GC-Graphs.png" alt="gc graph" /></p>
-
-<p>上图显示的是一个正常运行的程序。当发生内存泄露或者不正常的操作时，可以从图形本身明显地看出来。至少我们可以知道程序中存在和对象内存分配和垃圾回收相关的问题。然后利用其他标签如“Threads”中提供的信息和Thread Dump我们可以缩小发生问题的范围。</p>
-
-<p>在“监视”标签中，我们可以看到以时间线发展的内存使用概况图。这里有个“执行垃圾回收”按钮可以调用垃圾回收过程。
-<img src="/images/monitoringandanalysisgc/Perform-GC.png" alt="perform gc" /></p>
-
-<p>在“抽样器”标签中我们可以开始内存和CPU分析工作。抽样器会实时显示各个实例的使用情况。它可以帮助确定性能问题到底发生在哪里。</p>
-
-<p><img src="/images/monitoringandanalysisgc/Instances-Memory-Allocation.png" alt="instance memory allocation" /></p>
-
-<p>到此为止，关于<a href="/blog/categories/gc/">Java 垃圾回收的系列文章</a>已经完结了。</p>
 
 		
-		
+		<a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="more-link">Read on &rarr;</a>
 	</div>
 
 
@@ -224,125 +172,9 @@
 
 <p><img src="/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" /></p>
 
-<p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
-
-<h2>1. Serial Garbage Collector</h2>
-
-<p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
-
-<p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
-
-<h2>2. Parallel Garbage Collector</h2>
-
-<p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
-
-<h2>3. CMS Garbage Collector</h2>
-
-<p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
-
-<ol>
-<li>在老年代中标记引用对象的时候</li>
-<li>在做垃圾回收的过程中堆内存中有变化发生</li>
-</ol>
-
-
-<p>对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。</p>
-
-<p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
-
-<h2>4. G1 Garbage Collector</h2>
-
-<p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
-
-<p>使用<code>-XX:UseG1GC</code>JVM参数来开启使用G1垃圾回收器。</p>
-
-<p><strong>Java 8 的优化</strong></p>
-
-<p>在使用G1垃圾回收器是，开启使用<code>-XX:+UseStringDeduplacaton</code>JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是<em>Java 8 u 20</em>引入的选项。</p>
-
-<p>以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。</p>
-
-<h2>Garbage Collection JVM Options</h2>
-
-<p>下面是些主要的与Java垃圾回收相关的JVM选项。</p>
-
-<h3>Type of Garbage Collector to run</h3>
-
-<table>
-<thead>
-<tr>
-<th>选项</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-XX:+UseSerialGC</td>
-<td>串行垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:+UseParallelGC</td>
-<td>并行垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:+UseConcMarkSweepGC</td>
-<td>CMS垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:ParallesCMSThread=</td>
-<td>CMS垃圾回收器&ndash;使用的线程数量</td>
-</tr>
-<tr>
-<td>-XX:UseG1GC</td>
-<td>G1垃圾回收器</td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>GC 优化选项</h3>
-
-<table>
-<thead>
-<tr>
-<th>选项</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-Xms</td>
-<td>初始堆内存大小</td>
-</tr>
-<tr>
-<td>-Xmx</td>
-<td>最大堆内存大小</td>
-</tr>
-<tr>
-<td>-Xmn</td>
-<td>年轻代的大小</td>
-</tr>
-<tr>
-<td>-XX:PermSize</td>
-<td>初始永久代的大小</td>
-</tr>
-<tr>
-<td>-XX:MaxPermSize</td>
-<td>最大的永久代的大小</td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>Example Usage of JVM GC Options</h3>
-
-<pre><code>java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
-</code></pre>
-
-<p>在垃圾回收系列的<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">下一篇</a>中，将通过一个例子介绍如何区监控和分析垃圾回收。</p>
 
 		
-		
+		<a href="/blog/types-of-java-garbage-collectors/" class="more-link">Read on &rarr;</a>
 	</div>
 
 

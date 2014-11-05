@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jvm | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/jvm/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-05T15:49:59+08:00</updated>
+  <updated>2014-11-05T15:53:35+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -39,6 +39,9 @@
 <h2>Java VisualVM</h2>
 
 <p>Java VisualVM是在Java SE SDK安装时免费提供的。看下你的Java JDK安装目录下的<code>/bin</code>目录，<code>\Java\jdk1.8.0\bin</code>。此目录下有许多其他工具包括javac和java工具，jvisualvm就是其中一个。</p>
+
+<!--more-->
+
 
 <p>Java VisualVM对运行中的Java应用提供了可视化的信息展示。它是很多工具的整合包，像工具JConsole,jstat,jinfo,jstack以及jmap现在都是Java VisualVM的一部分。</p>
 
@@ -119,6 +122,9 @@
 
 
 <p><img src="/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" /></p>
+
+<!--more-->
+
 
 <p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
 
