@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>秦风汉雨</title>
+	<title>Java Garbage Collection Introduction - 秦风汉雨</title>
 	<meta name="author" content="You Li">
 
 	
@@ -78,18 +78,9 @@
 	
 		
 	
-	<div id="content" class="inner">
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/java-garbage-collection-introduction/">
-		
-			Java Garbage Collection Introduction</a>
-	</h2>
-	<div class="entry-content">
-		<p>本文非原创，翻译自<a href="http://javapapers.com/java/java-garbage-collection-introduction/">Java Garbage Collection introduction</a>
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Java Garbage Collection Introduction</h2>
+	<div class="entry-content"><p>本文非原创，翻译自<a href="http://javapapers.com/java/java-garbage-collection-introduction/">Java Garbage Collection introduction</a>
 在Java中为对象分配和释放内存空间都是由垃圾回收线程自动执行完成的。和C语言不一样的是Java程序员不需要手动写垃圾回收相关的代码。这是使得Java如此流行，同时也是Java能帮助程序员写出更好的Java应用的优点之一。</p>
 
 <p>计划写一个介绍Java垃圾回收基础的系列文章，共分四部分：</p>
@@ -145,10 +136,7 @@
 <p><img src="/images/introductiontogc/Java-Heap-Memory.jpg" alt="Java堆内存空间" /></p>
 
 <p><em>更新:永久代在Java8中被去掉了</em></p>
-
-		
-		
-	</div>
+</div>
 
 
 <div class="meta">
@@ -173,244 +161,29 @@
 
 </div>
 	
-	<div class="comments"><a href="/blog/java-garbage-collection-introduction/#disqus_thread">Comments</a></div>
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
 	
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
 		
-		<a href="/blog/do-not-say-these-words-when-debuging/">
 		
-			Do Not Say These Words When Debuging</a>
-	</h2>
-	<div class="entry-content">
-		<p>there is some interesting saying, when problems came out</p>
-
-<blockquote><p>Bushit, that&rsquo;s impossible!</p>
-
-<p>It&rsquo;s okay on my mechine!</p>
-
-<p>It shouldn&rsquo;t&hellip;</p>
-
-<p>It must be someone else&rsquo;s problem!</p>
-
-<p>Why it&rsquo;s ok previously?</p></blockquote>
-
-<p>HHHHHaaaa!</p>
-
 		
 		
 	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-11-04T10:25:23+08:00" pubdate data-updated="true"></time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/fun/'>fun</a>, <a class='category' href='/blog/categories/note/'>note</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/do-not-say-these-words-when-debuging/#disqus_thread">Comments</a></div>
 	
 </div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/java-gc-yuan-li/">
-		
-			Java 垃圾回收机制工作原理&#8211;How Java Garbage Collection Works?</a>
-	</h2>
-	<div class="entry-content">
-		<p>本文并非原创，翻译自文章<a href="http://javapapers.com/java/how-java-garbage-collection-works/">How Java Garbage Collection Works?</a>
-这篇文章的主要目的是来理解Java垃圾回收机制的基本原理以及它是如何工作的。这是垃圾回收机制系列文章的第二篇。希望您已经读过了第一部分<a href="/blog/java-garbage-collection-introduction/">Java垃圾回收简介</a>.</p>
-
-<p>Java垃圾回收是一个自动运行的管理程序运行时使用的内存的进程。通过GC的自动执行JVM将程序员从申请和释放内存的繁重操作中解放出来。</p>
-
-<h2>Java垃圾回收GC初始化</h2>
-
-<p>作为一个自动执行的进程，程序员不需要在代码中主动初始化GC。Java提供了<code>System.gc()</code>和<code>Runtime.gc()</code>这两个hook来请求JVM调用GC进程。</p>
-
-<p>尽管要求系统机制给程序员提供调用GC的机会，但是实际上这是由JVM负责决定的。JVM可以选择拒绝启动GC的请求，因此并不保证这些请求会真的调用垃圾回收。这是JVM基于内存堆空间的Eden区的使用情况做出的决定。JVM规范将这个选择权利留给了各个JVM的具体实现，因此实际上JVM是如何选择的视不同JVM的实现而定(不过要记住的是，不能依赖于这两个方法的调用，它们是不被保证执行的)。</p>
-
-<p>毫无疑问的是，我们知道垃圾回收进程是不能强制执行的。不过我刚发现一个调用<code>System.gc()</code>确实有意义的场景。看下这篇文章你就会了解<a href="http://javapapers.com/core-java/system-gc-invocation-a-suitable-scenario/">System.gc()调用是可用的</a>这个特殊的场景。</p>
-
-<h2>Java 垃圾回收进程</h2>
-
-<p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
-
-
-		
-		<a href="/blog/java-gc-yuan-li/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
 
 
 
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-22T19:34:46+08:00" pubdate data-updated="true"></time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
-
-
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-	
-	<div class="comments"><a href="/blog/java-gc-yuan-li/#disqus_thread">Comments</a></div>
-	
+</section>
 </div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/markdownlearn/">
-		
-			Markdown Learn</a>
-	</h2>
-	<div class="entry-content">
-		<h1>A First Level Header</h1>
-
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.
-Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
-
-<h2>A Second Level Header</h2>
-
-<p>Now is the time for all good men to come to the aid of their country,
-This is just a regular paragraph.</p>
-
-<p>The quick brown fox jumped over the lazy dog&rsquo;s back.</p>
-
-<h3>Header 3</h3>
-
-<blockquote><p>This is a blockquote.</p>
-
-<p>This is the second paragraph in the blockquote.</p>
-
-<p>This is an H2 in a blockquote</p></blockquote>
-
-<p>Some of these words <em>are emphasized</em>.
-Some of these words <em>are emphasized also</em>.
-Use two asterisks for <strong>strong emphasis</strong>.
-Or, if you prefer, <strong>use two underscores instead</strong>.</p>
-
-<h3>Lists</h3>
-
-<h4>无序列表</h4>
-
-<p>无序列表使用星号，加号和减号作为列表项目的标记</p>
-
-<h5>星号</h5>
-
-<ul>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>加号</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>减号</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-
-<h5>混合使用</h5></li>
-<li>Candy.</li>
-<li>Gum.</li>
-<li>Booze.
-由上面的测试可以显示，三者之间是完全等价的（<strong>符号和内容之间要有一个空格</strong>）
-
-<h4>有序列表</h4>
-
-<p>有序列表使用数字接着一个英文句点作为项目标记：</p></li>
-<li>Red</li>
-<li>Green</li>
-<li>Bule
-<strong>句点和内容之间要有一个空格</strong>
-
-<h4>项目之间的空行问题</h4></li>
-<li><p>A list item.</p>
-
-<p>  With multiple paragraphs.</p></li>
-<li><p>Another item in the list.</p></li>
-</ul>
-
-
-
-		
-		<a href="/blog/markdownlearn/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-18T01:07:36+08:00" pubdate data-updated="true"></time></div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/markdown/'>markdown</a>, <a class='category' href='/blog/categories/octopress/'>octopress</a>
-
-
-</div>
-	
-	<div class="comments"><a href="/blog/markdownlearn/#disqus_thread">Comments</a></div>
-	
-</div>
-</article>
-
-<nav id="pagenavi">
-    
-    
-    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
-</nav></div>
 	<footer id="footer" class="inner">Copyright &copy; 2014
 
     You Li
@@ -429,7 +202,10 @@ Or, if you prefer, <strong>use two underscores instead</strong>.</p>
       var disqus_shortname = 'youli9056githubio';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://youli9056.github.io/blog/java-garbage-collection-introduction/';
+        var disqus_url = 'http://youli9056.github.io/blog/java-garbage-collection-introduction/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
