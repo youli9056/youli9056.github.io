@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Java Garbage Collection Introduction"
+title: "Java垃圾回收机制一  简介--Java Garbage Collection Introduction"
 date: 2014-11-04 15:49:16 +0800
 comments: true
 categories: [gc,java,jvm] 

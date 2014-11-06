@@ -22,7 +22,7 @@ categories: [gc,java,jvm]
 
 ##Java VisualVM
 Java VisualVM是在Java SE SDK安装时免费提供的。看下你的Java JDK安装目录下的`/bin`目录，`\Java\jdk1.8.0\bin`。此目录下有许多其他工具包括javac和java工具，jvisualvm就是其中一个。
-
+<!--more-->
 Java VisualVM对运行中的Java应用提供了可视化的信息展示。它是很多工具的整合包，像工具JConsole,jstat,jinfo,jstack以及jmap现在都是Java VisualVM的一部分。
 
 Java VisualVM可以用来

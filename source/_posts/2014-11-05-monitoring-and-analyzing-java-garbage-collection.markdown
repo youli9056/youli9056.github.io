@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Monitoring and Analyzing Java Garbage Collection"
+title: "Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection"
 date: 2014-11-05 13:20:34 +0800
 comments: true
 categories: [gc,java,jvm] 

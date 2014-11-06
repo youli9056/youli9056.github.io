@@ -127,7 +127,7 @@ Java中有[多种不同的引用类型][different types of references in java]�
 
 下面将会将垃圾回收系列文章的第三部分：[Different types of Java garbage collectors avaliable][third part]
 [originblog]: http://javapapers.com/java/how-java-garbage-collection-works/
-[introducttojavagarbage]: blog/java-garbage-collection-introduction/
+[introducttojavagarbage]: /blog/java-garbage-collection-introduction/
 [system gc is applicable]: http://javapapers.com/core-java/system-gc-invocation-a-suitable-scenario/
 [different types of references in java]: http://javapapers.com/core-java/java-weak-reference/
 [garbage collection toturial]: http://javapapers.com/java/java-garbage-collection-introduction/

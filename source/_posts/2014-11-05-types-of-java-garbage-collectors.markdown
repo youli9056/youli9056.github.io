@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Types of Java Garbage Collectors"
+title: "Java垃圾回收机制三  Types of Java Garbage Collectors" 
 date: 2014-11-05 11:07:33 +0800
 comments: true
 categories: [gc,java,jvm]
@@ -12,25 +12,25 @@ categories: [gc,java,jvm]
 Java有四种类型的垃圾回收器，
 
 1. [Serial Garbage Collector](/blog/types-of-java-garbage-collectors/#serial-garbage-collector)
-	2. [Parallel Garbage Collector](#parallel-garbage-collector)
-	3. [CMS Garbage Collector](#cms-garbage-collector)
-	4. [G1 Garbage Collector](#g1-garbage-collector)
+2. [Parallel Garbage Collector](/blog/types-of-java-garbage-collectors/#parallel-garbage-collector)
+3. [CMS Garbage Collector](/blog/types-of-java-garbage-collectors/#cms-garbage-collector)
+4. [G1 Garbage Collector](/blog/types-of-java-garbage-collectors/#g1-garbage-collector)
 
 ![各种类型的Java垃圾回收器](/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg)
 <!--more-->
 这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。
 
-##1. Serial Garbage Collector
+##1. <span id="serial-garbage-collector">Serial Garbage Collector</span>
 
 串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。
 
 使用`-XX:+UseSerialGC`JVM参数来开启使用串行垃圾回收器。
 
-##2. Parallel Garbage Collector
+##2.<span id="parallel-garbage-collector"> Parallel Garbage Collector</span>
 
 并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。
 
-##3. CMS Garbage Collector
+##3.<span id="cms-garbage-collector"> CMS Garbage Collector</span>
 
 并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，
 
@@ -41,7 +41,7 @@ Java有四种类型的垃圾回收器，
 
 使用`-XX:+UseParNewGC`JVM参数来开启使用CMS垃圾回收器。
 
-##4. G1 Garbage Collector
+##4.<span id="g1-garbage-collector"> G1 Garbage Collector</span>
 
 G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。
 

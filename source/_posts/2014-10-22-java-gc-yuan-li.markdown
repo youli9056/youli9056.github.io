@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Java 垃圾回收机制工作原理--How Java Garbage Collection Works?"
+title: "Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?"
 date: 2014-10-22 19:34:46 +0800
 comments: true
 categories: ['Java','GC','JVM']
