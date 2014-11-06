@@ -3,11 +3,12 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Category: java - 秦风汉雨</title>
+	<title>接口和抽象类的区别  Diference Between Interface and Abstract Class - 秦风汉雨</title>
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="Category: java">
+	<meta name="description" content="面试过程中经常会被问道Java中接口和抽象类有什么区别，总觉得自己总结不好，也不全面。正好这里有篇文章感觉写得很好。下面是内容。 接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。
+接口中的变量默认是final的。抽象类可以包含非final的变量。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -77,139 +78,68 @@
 	
 		
 	
-	<div id="content" class="inner">
-	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">接口和抽象类的区别 Diference Between Interface and Abstract Class</h2>
+	<div class="entry-content"><p>面试过程中经常会被问道Java中接口和抽象类有什么区别，总觉得自己总结不好，也不全面。正好这里<a href="http://javapapers.com/core-java/abstract-and-interface-core-java-2/difference-between-a-java-interface-and-a-java-abstract-class/">有篇文章</a>感觉写得很好。下面是内容。</p>
+
+<ol>
+<li><p>接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。</p></li>
+<li><p>接口中的变量默认是final的。抽象类可以包含非final的变量。</p></li>
+<li><p>接口的成员默认是public的。抽象类可以有任意类型的成员，private，protected都可以。</p></li>
+<li><p>实现接口需要用implements关键字。继承抽象类用extends关键字。</p></li>
+<li><p>接口继承一个或者多个接口，但是不能继承或实现任意抽象抑或者实体类。抽象类可以继承另外一个Java类同时还可以实现多个Java接口。</p></li>
+<li><p>一个Java类可以实现多个接口，但是只能继承一个抽象类。</p></li>
+<li><p>接口是完全抽象的，不能够实例化。抽象类也是不能被实例化的，但是如果其中有main()方法时，还是可以调用。</p></li>
+<li><p>和抽象类相比，接口定义的引用在具体执行时由于需要做额外的间接寻址工作因此会慢些。(执行时需要通过搜索具体类的实现方法)</p></li>
+</ol>
+
+</div>
 
 
-	
-	
-	<section class="archives"><h1 class="year">2014</h1>
+<div class="meta">
+	<div class="date">
 
-<article>
-	<h2 class="title"><a href="/blog/diference-between-interface-and-abstract-class/">接口和抽象类的区别  Diference Between Interface and Abstract Class</a></h2>
-	<div class="meta">
-		<div class="date">Nov  6</div>
-		<div class="tags">
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-06T18:03:19+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
 
 
 	<a class='category' href='/blog/categories/basics/'>basics</a>, <a class='category' href='/blog/categories/java/'>java</a>
 
 
 </div>
-	    
-	    <div class="comments"><a href="/blog/diference-between-interface-and-abstract-class/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
 	
-
+	<div class="comments"><a href="#disqus_thread">Comments</a></div>
 	
-
-
-<article>
-	<h2 class="title"><a href="/blog/overloading-and-overriding/">深入理解重载和重写及与之相关的多态性  Overloading and overriding</a></h2>
-	<div class="meta">
-		<div class="date">Nov  5</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/basics/'>basics</a>, <a class='category' href='/blog/categories/java/'>java</a>
-
-
 </div>
-	    
-	    <div class="comments"><a href="/blog/overloading-and-overriding/#disqus_thread">Comments</a></div>
-	    
-	</div>
 </article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		
+		
+	</div>
 	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/monitoring-and-analyzing-java-garbage-collection/">Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</a></h2>
-	<div class="meta">
-		<div class="date">Nov  5</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
-
-
 </div>
-	    
-	    <div class="comments"><a href="/blog/monitoring-and-analyzing-java-garbage-collection/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
-	
-
-	
 
 
-<article>
-	<h2 class="title"><a href="/blog/types-of-java-garbage-collectors/">Java垃圾回收机制三  Types of Java Garbage Collectors</a></h2>
-	<div class="meta">
-		<div class="date">Nov  5</div>
-		<div class="tags">
 
-
-	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
-
-
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-	    
-	    <div class="comments"><a href="/blog/types-of-java-garbage-collectors/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
-	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/java-garbage-collection-introduction/">Java垃圾回收机制一  简介&#8211;Java Garbage Collection Introduction</a></h2>
-	<div class="meta">
-		<div class="date">Nov  4</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
-
-
-</div>
-	    
-	    <div class="comments"><a href="/blog/java-garbage-collection-introduction/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
-	
-
-	
-
-
-<article>
-	<h2 class="title"><a href="/blog/java-gc-yuan-li/">Java垃圾回收机制二  工作原理&#8211;How Java Garbage Collection Works?</a></h2>
-	<div class="meta">
-		<div class="date">Oct 22</div>
-		<div class="tags">
-
-
-	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
-
-
-</div>
-	    
-	    <div class="comments"><a href="/blog/java-gc-yuan-li/#disqus_thread">Comments</a></div>
-	    
-	</div>
-</article>
-	
-	</section>
-	
-
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2014
 
@@ -229,7 +159,10 @@
       var disqus_shortname = 'youli9056githubio';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://youli9056.github.io/blog/diference-between-interface-and-abstract-class/';
+        var disqus_url = 'http://youli9056.github.io/blog/diference-between-interface-and-abstract-class/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

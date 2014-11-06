@@ -7,7 +7,8 @@
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="本文分割线之前非原创，翻译自Overloading and overriding. 重载和重写除了在名称上有些相似之外，其实是完全不同的两个东西。 重载的目的是使得我们能够用用一个统一的接口名称来调用一系列方法。这些方法的目的也许是一样的，但是它们的实现方式会根据传入的参数不同而不同。 &hellip;">
+	<meta name="description" content="面试过程中经常会被问道Java中接口和抽象类有什么区别，总觉得自己总结不好，也不全面。正好这里有篇文章感觉写得很好。下面是内容。 接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。
+接口中的变量默认是final的。抽象类可以包含非final的变量。 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -78,6 +79,61 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/diference-between-interface-and-abstract-class/">
+		
+			接口和抽象类的区别 Diference Between Interface and Abstract Class</a>
+	</h2>
+	<div class="entry-content">
+		<p>面试过程中经常会被问道Java中接口和抽象类有什么区别，总觉得自己总结不好，也不全面。正好这里<a href="http://javapapers.com/core-java/abstract-and-interface-core-java-2/difference-between-a-java-interface-and-a-java-abstract-class/">有篇文章</a>感觉写得很好。下面是内容。</p>
+
+<ol>
+<li><p>接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。</p></li>
+<li><p>接口中的变量默认是final的。抽象类可以包含非final的变量。</p></li>
+<li><p>接口的成员默认是public的。抽象类可以有任意类型的成员，private，protected都可以。</p></li>
+<li><p>实现接口需要用implements关键字。继承抽象类用extends关键字。</p></li>
+<li><p>接口继承一个或者多个接口，但是不能继承或实现任意抽象抑或者实体类。抽象类可以继承另外一个Java类同时还可以实现多个Java接口。</p></li>
+<li><p>一个Java类可以实现多个接口，但是只能继承一个抽象类。</p></li>
+<li><p>接口是完全抽象的，不能够实例化。抽象类也是不能被实例化的，但是如果其中有main()方法时，还是可以调用。</p></li>
+<li><p>和抽象类相比，接口定义的引用在具体执行时由于需要做额外的间接寻址工作因此会慢些。(执行时需要通过搜索具体类的实现方法)</p></li>
+</ol>
+
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-06T18:03:19+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/basics/'>basics</a>, <a class='category' href='/blog/categories/java/'>java</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/diference-between-interface-and-abstract-class/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
