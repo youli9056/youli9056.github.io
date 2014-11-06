@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jvm | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/jvm/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-05T15:53:35+08:00</updated>
+  <updated>2014-11-06T17:52:58+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Monitoring and Analyzing Java Garbage Collection]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection]]></title>
     <link href="http://youli9056.github.io/blog/monitoring-and-analyzing-java-garbage-collection/"/>
     <updated>2014-11-05T13:20:34+08:00</updated>
     <id>http://youli9056.github.io/blog/monitoring-and-analyzing-java-garbage-collection</id>
@@ -99,7 +99,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Types of Java Garbage Collectors]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制三  Types of Java Garbage Collectors]]></title>
     <link href="http://youli9056.github.io/blog/types-of-java-garbage-collectors/"/>
     <updated>2014-11-05T11:07:33+08:00</updated>
     <id>http://youli9056.github.io/blog/types-of-java-garbage-collectors</id>
@@ -110,14 +110,10 @@
 <p>Java有四种类型的垃圾回收器，</p>
 
 <ol>
-<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a>
-
-<ol>
-<li><a href="#parallel-garbage-collector">Parallel Garbage Collector</a></li>
-<li><a href="#cms-garbage-collector">CMS Garbage Collector</a></li>
-<li><a href="#g1-garbage-collector">G1 Garbage Collector</a></li>
-</ol>
-</li>
+<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#parallel-garbage-collector">Parallel Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#cms-garbage-collector">CMS Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#g1-garbage-collector">G1 Garbage Collector</a></li>
 </ol>
 
 
@@ -128,17 +124,17 @@
 
 <p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
 
-<h2>1. Serial Garbage Collector</h2>
+<h2>1. <span id="serial-garbage-collector">Serial Garbage Collector</span></h2>
 
 <p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
 
 <p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
 
-<h2>2. Parallel Garbage Collector</h2>
+<h2>2.<span id="parallel-garbage-collector"> Parallel Garbage Collector</span></h2>
 
 <p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
 
-<h2>3. CMS Garbage Collector</h2>
+<h2>3.<span id="cms-garbage-collector"> CMS Garbage Collector</span></h2>
 
 <p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
 
@@ -152,7 +148,7 @@
 
 <p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
 
-<h2>4. G1 Garbage Collector</h2>
+<h2>4.<span id="g1-garbage-collector"> G1 Garbage Collector</span></h2>
 
 <p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
 
@@ -246,7 +242,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Java Garbage Collection Introduction]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制一  简介--Java Garbage Collection Introduction]]></title>
     <link href="http://youli9056.github.io/blog/java-garbage-collection-introduction/"/>
     <updated>2014-11-04T15:49:16+08:00</updated>
     <id>http://youli9056.github.io/blog/java-garbage-collection-introduction</id>
@@ -313,7 +309,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Java 垃圾回收机制工作原理--How Java Garbage Collection Works?]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?]]></title>
     <link href="http://youli9056.github.io/blog/java-gc-yuan-li/"/>
     <updated>2014-10-22T19:34:46+08:00</updated>
     <id>http://youli9056.github.io/blog/java-gc-yuan-li</id>

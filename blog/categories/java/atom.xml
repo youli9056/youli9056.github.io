@@ -4,7 +4,7 @@
   <title><![CDATA[Category: java | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-05T15:53:35+08:00</updated>
+  <updated>2014-11-06T17:52:58+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -14,7 +14,171 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Monitoring and Analyzing Java Garbage Collection]]></title>
+    <title type="html"><![CDATA[深入理解重载和重写及与之相关的多态性  Overloading and overriding]]></title>
+    <link href="http://youli9056.github.io/blog/overloading-and-overriding/"/>
+    <updated>2014-11-05T16:03:56+08:00</updated>
+    <id>http://youli9056.github.io/blog/overloading-and-overriding</id>
+    <content type="html"><![CDATA[<p>本文分割线之前非原创，翻译自<a href="http://javapapers.com/core-java/overloading-and-overriding/">Overloading and overriding</a>.</p>
+
+<p>重载和重写除了在名称上有些相似之外，其实是完全不同的两个东西。</p>
+
+<p>重载的目的是使得我们能够用用一个统一的接口名称来调用一系列方法。这些方法的目的也许是一样的，但是它们的实现方式会根据传入的参数不同而不同。</p>
+
+<p>重写涉及到继承这个概念中的问题。子类继承了父类的方法，但是它可能需要有不同的操作行为，这时候就需要在子类中重写这个父类方法。</p>
+
+<p>重载本身并不是多态，同时运行时绑定重载方法也不是多态的表现。它们以及一些其他的东西都是其面向对象多态性的使用（原文：All these and more are used to exercise the object oriented property polymorphism.总感觉翻译不要，故贴上来）。</p>
+
+<h2>重载和重写的关键点</h2>
+
+<ul>
+<li>private： 一个私有的java方法是不能被重写的，因为它对子类压根就不可见</li>
+<li>final：重载一个final的方法是可以的，但是不能重写它，因此父类如果将方法声明为final的就可保证所有子类的调用此方法时调用的都是父类的方法。</li>
+<li>final：如果两个方法有同样的参数列表，而其中一个的参数被声明为final的这种情况下这两个方法完全一样，因此不可重载。编译都通不过，因为这两个方法被视为完全一样。</li>
+<li>static：可以重载一个静态的Java方法但是不能重写静态的Java方法，因为静态方法在方法区中只有一个。</li>
+<li>static：重载是关于对象(实例）和继承而言的。一个声明为静态的方法属于整个类(对于这个的所有对象都是一样的)。因此重写它没有任何意义。</li>
+<li>static：对于重载，两个静态方法的重载没有什么特别的，只不过是修饰符多了个static修饰符。参数列表依然必须不同。</li>
+</ul>
+
+
+<!--more-->
+
+
+<h2>重载</h2>
+
+<p>让我们来详细讨论下重载。在各种网站上我看到了大量的重载的例子。它们向类中添加更多的属性、方法，把它变得看起来更庞大作为重载的象征。事实上正确的方式是，当我们使用重载时外部看起来我们的类会变得更加紧凑。</p>
+
+<p><img src="/images/overloadingandoverriding/beforeoverloading.png" alt="重载之前" /></p>
+
+<p>这里贴出来两个图片，第一张里面是印度的古典乐器脚踏式风琴，它是现代钢琴的鼻祖。另一幅图片是现代的电子琴。在我们的重载语境中，古典风琴是重载之前，电子琴是重载之后。</p>
+
+<p><img src="/images/overloadingandoverriding/afteroverloading.png" alt="重载之后" /></p>
+
+<h3>Java Example for Method Overloading</h3>
+
+<hr />
+
+<pre><code>public class OverloadingExample {
+    public static void main(String args[]){
+        System.out.println(playMusic("C sharp","D sharp"));
+        System.out.println(playMusic("C","D flat","E flat"));
+    }
+    public static String playMusic(String c, String d){
+        return c+d;
+    }
+    public static String playMusic(String c, String d, String e){
+        return c+d+e;
+    }
+}
+</code></pre>
+
+<h3>Java Overloading Puzzle</h3>
+
+<hr />
+
+<pre><code>package com.javapapaer.java;
+
+public class NullArguementOverloading {
+    public static void main(String[] args) {
+        NullArguementOverloading obj = new NullArguementOverloading();
+        obj.overLoad(null);
+    }
+    private void overLoad(Object o){
+        System.out.println("Object o arguement method.");
+    }
+    private void overLoad(double[] dArray){
+        System.out.println("Double array argument method.");
+    }
+}
+</code></pre>
+
+<p>猜一猜，上面的输出是啥？</p>
+
+<h3>Overriding  重写</h3>
+
+<hr />
+
+<p>当继承一个类的时候,根据父类方法的访问修饰符子类可以获得所有protect以上的父类方法。但是父类的方法的具体行为可能在子类中并不适合，因此我们需要根据子类对于这个方法的需求重写继承自父类的这个方法。重写后原来的旧方法对于这个子类会完全废弃。</p>
+
+<p>看看下面这个猛兽皮卡，因为需求不同了，原来又小又旧的轮子被换成了巨无霸。这就是现实生活中的重写。</p>
+
+<p><img src="/images/overloadingandoverriding/Overriding.png" alt="Overriding" /></p>
+
+<h3>Overriding in Java/JDK</h3>
+
+<p>在Java中默认所有对象都是继承自Object类。Object有个叫<em>equals</em>的方法，在String类中重写了它的默认行为。String中通过比较传入的对象与本身保存的字符串序列一一对比看是否相等。</p>
+
+<h1>分割线～～～～～～～～～～～～～～～～～～～～～～～</h1>
+
+<hr />
+
+<p>关于上面Overloading Puzzle，以免强迫症患者费心敲代码在此给出答案和解释。</p>
+
+<p>程序输出：<strong>Double array argument method.</strong></p>
+
+<p>原因是Java对于重载的处理有个最精确原则。Object和double[]都可以和null匹配，但是两者对比而言，double[]比Object匹配得更精确，所以调用了下面的overLoad方法。如果想让程序调用Object的overLoad方法则需要一个强制类型转换<code>obj.overLoad((Object)null);</code>这样Object的overLoad就要比double[]的更精确,会输出<em>Object o arguement method.</em>。</p>
+
+<p>下面这段代码也许理解起来会更清晰一些，ArrayList继承自List：</p>
+
+<pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class OverridePuzzle {
+
+    private void overloadList(List list){
+        System.out.println("List arguement method.");
+    }
+
+    private void overloadList(ArrayList arrayList){
+        System.out.println("ArrayList arguement method");
+    }
+    public static void main(String[] args) {
+        OverridePuzzle op = new OverridePuzzle();
+        op.overloadList(null);
+    }
+
+}
+</code></pre>
+
+<p>那么它将输出:<strong>ArrayList arguement method</strong>，因为ArrayList比List匹配得更精确。</p>
+
+<p>那又要问了，如果上文的NullArguementOverloading代码中还有个overLoad方法如下：</p>
+
+<pre><code>private void overLoad(String str) {
+    System.out.println("String argument method.");
+}
+</code></pre>
+
+<p>那么程序会怎样呢？答案是main函数<code>obj.overLoad(null)</code>那一行会编译报错。String的overLoad和double[]的overLoad都可以匹配，但是两者在继承属上是平行的，因此编译器也不知道到底该调用哪一个重载方法。另外这段代码还说明了一个问题：重载是在编译期就已经确定了的，并不需要等到运行时才能确定。这也是为什么说它不是多态的一个原因。</p>
+
+<p>还有下面一段代码作为佐证：</p>
+
+<pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class OverridePuzzle {
+
+    private void overloadList(List list){
+        System.out.println("List arguement method.");
+    }
+
+    private void overloadList(ArrayList arrayList){
+        System.out.println("ArrayList arguement method");
+    }
+    public static void main(String[] args) {
+        OverridePuzzle op = new OverridePuzzle();
+        List list = new ArrayList&lt;String&gt;();
+        op.overloadList(list);
+    }
+
+}
+</code></pre>
+
+<p>程序输出：<strong>List arguement method.</strong>。显然这里重载对于传入的参数类型只认了引用的类型，并没有去解析实际对象的类型。如果重载是一种多态的话，它这里应该去解析实际对象的类型并调用ArrayList的方法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection]]></title>
     <link href="http://youli9056.github.io/blog/monitoring-and-analyzing-java-garbage-collection/"/>
     <updated>2014-11-05T13:20:34+08:00</updated>
     <id>http://youli9056.github.io/blog/monitoring-and-analyzing-java-garbage-collection</id>
@@ -99,7 +263,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Types of Java Garbage Collectors]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制三  Types of Java Garbage Collectors]]></title>
     <link href="http://youli9056.github.io/blog/types-of-java-garbage-collectors/"/>
     <updated>2014-11-05T11:07:33+08:00</updated>
     <id>http://youli9056.github.io/blog/types-of-java-garbage-collectors</id>
@@ -110,14 +274,10 @@
 <p>Java有四种类型的垃圾回收器，</p>
 
 <ol>
-<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a>
-
-<ol>
-<li><a href="#parallel-garbage-collector">Parallel Garbage Collector</a></li>
-<li><a href="#cms-garbage-collector">CMS Garbage Collector</a></li>
-<li><a href="#g1-garbage-collector">G1 Garbage Collector</a></li>
-</ol>
-</li>
+<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#parallel-garbage-collector">Parallel Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#cms-garbage-collector">CMS Garbage Collector</a></li>
+<li><a href="/blog/types-of-java-garbage-collectors/#g1-garbage-collector">G1 Garbage Collector</a></li>
 </ol>
 
 
@@ -128,17 +288,17 @@
 
 <p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
 
-<h2>1. Serial Garbage Collector</h2>
+<h2>1. <span id="serial-garbage-collector">Serial Garbage Collector</span></h2>
 
 <p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
 
 <p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
 
-<h2>2. Parallel Garbage Collector</h2>
+<h2>2.<span id="parallel-garbage-collector"> Parallel Garbage Collector</span></h2>
 
 <p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
 
-<h2>3. CMS Garbage Collector</h2>
+<h2>3.<span id="cms-garbage-collector"> CMS Garbage Collector</span></h2>
 
 <p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
 
@@ -152,7 +312,7 @@
 
 <p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
 
-<h2>4. G1 Garbage Collector</h2>
+<h2>4.<span id="g1-garbage-collector"> G1 Garbage Collector</span></h2>
 
 <p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
 
@@ -246,7 +406,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Java Garbage Collection Introduction]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制一  简介--Java Garbage Collection Introduction]]></title>
     <link href="http://youli9056.github.io/blog/java-garbage-collection-introduction/"/>
     <updated>2014-11-04T15:49:16+08:00</updated>
     <id>http://youli9056.github.io/blog/java-garbage-collection-introduction</id>
@@ -313,7 +473,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Java 垃圾回收机制工作原理--How Java Garbage Collection Works?]]></title>
+    <title type="html"><![CDATA[Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?]]></title>
     <link href="http://youli9056.github.io/blog/java-gc-yuan-li/"/>
     <updated>2014-10-22T19:34:46+08:00</updated>
     <id>http://youli9056.github.io/blog/java-gc-yuan-li</id>
