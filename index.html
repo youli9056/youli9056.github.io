@@ -7,8 +7,7 @@
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="面试过程中经常会被问道Java中接口和抽象类有什么区别，总觉得自己总结不好，也不全面。正好这里有篇文章感觉写得很好。下面是内容。 接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。
-接口中的变量默认是final的。抽象类可以包含非final的变量。 &hellip;">
+	<meta name="description" content="James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思考。 Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载( &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -79,6 +78,64 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/why-multiple-inheritance-is-not-supported-in-java/">
+		
+			Java为何不支持多继承 Why Multiple Inheritance Is Not Supported in Java</a>
+	</h2>
+	<div class="entry-content">
+		<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思考。</p>
+
+<blockquote><p>Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，<strong>多继承</strong>，广泛的自动强制类型转换。</p></blockquote>
+
+<p>还有谁比James Gosling更有资格来对此作评论。这段话给了我们一个概要，并提起了不支持多继承的话题。</p>
+
+<h2>Java不支持多继承</h2>
+
+<hr />
+
+<p>首先让我们来盖棺定论。Java到底支不支持多继承本身就是一个争议点。有人说Java支持多继承。<strong>不，Java中没有对多继承的支持</strong>。如果你不相信我的话，把上面Java之父的那段话再读一下。</p>
+
+<p>用接口支持多继承的说法是我们这些开发人员自己编造出来的。接口比实体类提供了更高的灵活性，我们可以选择用单个类去实现多个接口。这样我们通过继承两个模板来构建一个类。</p>
+
+<p>这样做是在尝试向多继承靠近。其实我们做的是实现多个接口，却没有继承任何东西。实现一个类的接口的工作是向其中添加属性和方法，而不能直接从父类中获取具体实现。简单地说，Java中没有堆多继承的支持。</p>
+
+
+		
+		<a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-06T21:43:11+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/basics/'>basics</a>, <a class='category' href='/blog/categories/java/'>java</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/why-multiple-inheritance-is-not-supported-in-java/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">
