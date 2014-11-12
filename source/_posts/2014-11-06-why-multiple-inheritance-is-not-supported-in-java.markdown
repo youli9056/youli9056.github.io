@@ -5,7 +5,9 @@ date: 2014-11-06 21:43:11 +0800
 comments: true
 categories: [basics,java]
 ---
-James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思考。
+原文：http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/
+
+James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思量。
 >Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，**多继承**，广泛的自动强制类型转换。
 
 还有谁比James Gosling更有资格来对此作评论。这段话给了我们一个概要，并提起了不支持多继承的话题。
