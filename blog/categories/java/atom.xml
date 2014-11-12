@@ -4,7 +4,7 @@
   <title><![CDATA[Category: java | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/java/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-07T17:23:29+08:00</updated>
+  <updated>2014-11-12T15:34:05+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -14,11 +14,22 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Java(JVM)内存类型详解  Java(JVM) Memory Types]]></title>
+    <link href="http://youli9056.github.io/blog/java-jvm-memory-types/"/>
+    <updated>2014-11-07T22:46:35+08:00</updated>
+    <id>http://youli9056.github.io/blog/java-jvm-memory-types</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java]]></title>
     <link href="http://youli9056.github.io/blog/why-multiple-inheritance-is-not-supported-in-java/"/>
     <updated>2014-11-06T21:43:11+08:00</updated>
     <id>http://youli9056.github.io/blog/why-multiple-inheritance-is-not-supported-in-java</id>
-    <content type="html"><![CDATA[<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思考。</p>
+    <content type="html"><![CDATA[<p>原文：<a href="http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/">http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/</a></p>
+
+<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思量。</p>
 
 <blockquote><p>Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，<strong>多继承</strong>，广泛的自动强制类型转换。</p></blockquote>
 
@@ -340,149 +351,6 @@ public class OverridePuzzle {
 <p><img src="/images/monitoringandanalysisgc/Instances-Memory-Allocation.png" alt="instance memory allocation" /></p>
 
 <p>到此为止，关于<a href="/blog/categories/gc/">Java 垃圾回收的系列文章</a>已经完结了。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Java垃圾回收机制三  Types of Java Garbage Collectors]]></title>
-    <link href="http://youli9056.github.io/blog/types-of-java-garbage-collectors/"/>
-    <updated>2014-11-05T11:07:33+08:00</updated>
-    <id>http://youli9056.github.io/blog/types-of-java-garbage-collectors</id>
-    <content type="html"><![CDATA[<p>本文是Java垃圾回收系列的第三篇，非原创，翻译自<a href="http://javapapers.com/java/types-of-java-garbage-collectors/">Types of Java Garbage Collectors</a>。如果没有相应基础的话，阅读本文前建议先阅读前两篇<a href="/blog/java-garbage-collection-introduction/">Java Garbage Collection Introduction</a>(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和<a href="/blog/java-gc-yuan-li/">How Java Garbage Collection Works?</a>(概况介绍了GC是如何工作的)</p>
-
-<p>本文将会介绍各种不同类型的Java垃圾回收器。垃圾回收是Java用来将程序员从分配和释放内存的琐事中解放出来的自动过程。</p>
-
-<p>Java有四种类型的垃圾回收器，</p>
-
-<ol>
-<li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a></li>
-<li><a href="/blog/types-of-java-garbage-collectors/#parallel-garbage-collector">Parallel Garbage Collector</a></li>
-<li><a href="/blog/types-of-java-garbage-collectors/#cms-garbage-collector">CMS Garbage Collector</a></li>
-<li><a href="/blog/types-of-java-garbage-collectors/#g1-garbage-collector">G1 Garbage Collector</a></li>
-</ol>
-
-
-<p><img src="/images/typesofjavagarbagecollectors/Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" /></p>
-
-<!--more-->
-
-
-<p>这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
-
-<h2>1. <span id="serial-garbage-collector">Serial Garbage Collector</span></h2>
-
-<p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
-
-<p>使用<code>-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
-
-<h2>2.<span id="parallel-garbage-collector"> Parallel Garbage Collector</span></h2>
-
-<p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
-
-<h2>3.<span id="cms-garbage-collector"> CMS Garbage Collector</span></h2>
-
-<p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
-
-<ol>
-<li>在老年代中标记引用对象的时候</li>
-<li>在做垃圾回收的过程中堆内存中有变化发生</li>
-</ol>
-
-
-<p>对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。</p>
-
-<p>使用<code>-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
-
-<h2>4.<span id="g1-garbage-collector"> G1 Garbage Collector</span></h2>
-
-<p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
-
-<p>使用<code>-XX:UseG1GC</code>JVM参数来开启使用G1垃圾回收器。</p>
-
-<p><strong>Java 8 的优化</strong></p>
-
-<p>在使用G1垃圾回收器是，开启使用<code>-XX:+UseStringDeduplacaton</code>JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是<em>Java 8 u 20</em>引入的选项。</p>
-
-<p>以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。</p>
-
-<h2>Garbage Collection JVM Options</h2>
-
-<p>下面是些主要的与Java垃圾回收相关的JVM选项。</p>
-
-<h3>Type of Garbage Collector to run</h3>
-
-<table>
-<thead>
-<tr>
-<th>选项</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-XX:+UseSerialGC</td>
-<td>串行垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:+UseParallelGC</td>
-<td>并行垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:+UseConcMarkSweepGC</td>
-<td>CMS垃圾回收器</td>
-</tr>
-<tr>
-<td>-XX:ParallesCMSThread=</td>
-<td>CMS垃圾回收器&ndash;使用的线程数量</td>
-</tr>
-<tr>
-<td>-XX:UseG1GC</td>
-<td>G1垃圾回收器</td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>GC 优化选项</h3>
-
-<table>
-<thead>
-<tr>
-<th>选项</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-Xms</td>
-<td>初始堆内存大小</td>
-</tr>
-<tr>
-<td>-Xmx</td>
-<td>最大堆内存大小</td>
-</tr>
-<tr>
-<td>-Xmn</td>
-<td>年轻代的大小</td>
-</tr>
-<tr>
-<td>-XX:PermSize</td>
-<td>初始永久代的大小</td>
-</tr>
-<tr>
-<td>-XX:MaxPermSize</td>
-<td>最大的永久代的大小</td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>Example Usage of JVM GC Options</h3>
-
-<pre><code>java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
-</code></pre>
-
-<p>在垃圾回收系列的<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">下一篇</a>中，将通过一个例子介绍如何区监控和分析垃圾回收。</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: basics | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/basics/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-07T17:23:29+08:00</updated>
+  <updated>2014-11-12T15:34:05+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -14,11 +14,22 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Java(JVM)内存类型详解  Java(JVM) Memory Types]]></title>
+    <link href="http://youli9056.github.io/blog/java-jvm-memory-types/"/>
+    <updated>2014-11-07T22:46:35+08:00</updated>
+    <id>http://youli9056.github.io/blog/java-jvm-memory-types</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java]]></title>
     <link href="http://youli9056.github.io/blog/why-multiple-inheritance-is-not-supported-in-java/"/>
     <updated>2014-11-06T21:43:11+08:00</updated>
     <id>http://youli9056.github.io/blog/why-multiple-inheritance-is-not-supported-in-java</id>
-    <content type="html"><![CDATA[<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思考。</p>
+    <content type="html"><![CDATA[<p>原文：<a href="http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/">http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/</a></p>
+
+<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思量。</p>
 
 <blockquote><p>Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，<strong>多继承</strong>，广泛的自动强制类型转换。</p></blockquote>
 
