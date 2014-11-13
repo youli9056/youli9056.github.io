@@ -7,10 +7,8 @@
 	<meta name="author" content="You Li">
 
 	
-	<meta name="description" content="A First Level Header Some of these words are emphasized.
-Some of these words are emphasized also.
-Use two asterisks for strong emphasis.
-Or, if you &hellip;">
+	<meta name="description" content="本文并非原创，翻译自文章How Java Garbage Collection Works?
+这篇文章的主要目的是来理解Java垃圾回收机制的基本原理以及它是如何工作的。这是垃圾回收机制系列文章的第二篇。希望您已经读过了第一部分Java垃圾回收简介. &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -81,6 +79,65 @@ Or, if you &hellip;">
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/java-gc-yuan-li/">
+		
+			Java垃圾回收机制二 工作原理&#8211;How Java Garbage Collection Works?</a>
+	</h2>
+	<div class="entry-content">
+		<p>本文并非原创，翻译自文章<a href="http://javapapers.com/java/how-java-garbage-collection-works/">How Java Garbage Collection Works?</a>
+这篇文章的主要目的是来理解Java垃圾回收机制的基本原理以及它是如何工作的。这是垃圾回收机制系列文章的第二篇。希望您已经读过了第一部分<a href="/blog/java-garbage-collection-introduction/">Java垃圾回收简介</a>.</p>
+
+<p>Java垃圾回收是一个自动运行的管理程序运行时使用的内存的进程。通过GC的自动执行JVM将程序员从申请和释放内存的繁重操作中解放出来。</p>
+
+<h2>Java垃圾回收GC初始化</h2>
+
+<p>作为一个自动执行的进程，程序员不需要在代码中主动初始化GC。Java提供了<code>System.gc()</code>和<code>Runtime.gc()</code>这两个hook来请求JVM调用GC进程。</p>
+
+<p>尽管要求系统机制给程序员提供调用GC的机会，但是实际上这是由JVM负责决定的。JVM可以选择拒绝启动GC的请求，因此并不保证这些请求会真的调用垃圾回收。这是JVM基于内存堆空间的Eden区的使用情况做出的决定。JVM规范将这个选择权利留给了各个JVM的具体实现，因此实际上JVM是如何选择的视不同JVM的实现而定(不过要记住的是，不能依赖于这两个方法的调用，它们是不被保证执行的)。</p>
+
+<p>毫无疑问的是，我们知道垃圾回收进程是不能强制执行的。不过我刚发现一个调用<code>System.gc()</code>确实有意义的场景。看下这篇文章你就会了解<a href="http://javapapers.com/core-java/system-gc-invocation-a-suitable-scenario/">System.gc()调用是可用的</a>这个特殊的场景。</p>
+
+<h2>Java 垃圾回收进程</h2>
+
+<p>垃圾回收是一个回收不再使用的内存空间并将它变成能够为将来的实例使用的过程。<img src="/images/howjavaGCworks/Java-Garbage-Collection-Process3_thumb.jpg" alt="java gc collection process3" /></p>
+
+
+		
+		<a href="/blog/java-gc-yuan-li/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-22T19:34:46+08:00" pubdate data-updated="true"></time></div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/gc/'>gc</a>, <a class='category' href='/blog/categories/java/'>java</a>, <a class='category' href='/blog/categories/jvm/'>jvm</a>
+
+
+</div>
+	
+	<div class="comments"><a href="/blog/java-gc-yuan-li/#disqus_thread">Comments</a></div>
+	
+</div>
+</article>
 
 
     <article class="post">

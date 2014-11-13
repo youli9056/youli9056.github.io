@@ -4,7 +4,7 @@
   <title><![CDATA[Category: hadoop | 秦风汉雨]]></title>
   <link href="http://youli9056.github.io/blog/categories/hadoop/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-12T16:09:12+08:00</updated>
+  <updated>2014-11-13T22:50:22+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -12,6 +12,97 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop]]></title>
+    <link href="http://youli9056.github.io/blog/analyzing-load-balancing-on-hadoop/"/>
+    <updated>2014-11-12T16:18:21+08:00</updated>
+    <id>http://youli9056.github.io/blog/analyzing-load-balancing-on-hadoop</id>
+    <content type="html"><![CDATA[<p>在<a href="/blog/load-balancing-on-hadoop-mapreduce/">上一篇文章</a>中，简要介绍了<a href="/blog/load-balancing-on-hadoop-mapreduce/">负载均衡问题</a>，及其在Hadoop MapReduce平台中的表现。本文将进行详细分析，并介绍一些解决方案。</p>
+
+<h2>一、倾斜类型</h2>
+
+<ol>
+<li><p>数据倾斜</p>
+
+<p> 输入数据分布不均，有些节点处理的数据远大于其他节点。可能会出现下面的情况，有个Join操作（reduce端join）输出数据量的大小</p></li>
+</ol>
+
+
+<p><img src="/images/analyzingloadbalancing/reducesidejoin.png" alt="reduce side join output" /></p>
+
+<ol>
+<li><p>计算倾斜</p>
+
+<p> 运算的复杂度与输入的数据量关系不大，而取决于输入数据的特性。例如，PageRank这样的算法，一个节点的计算复杂度是于这个节点的出度有关，即使分配到一个计算节点上的数据相等，它们的实际运算时间由于度数的差别，还是会出现类似下图这样的情况。</p></li>
+</ol>
+
+
+<p><img src="/images/analyzingloadbalancing/computeunbalance.png" alt="compute unbalance" /></p>
+
+<h2>二、解决方案</h2>
+
+<p>两种倾斜方式中数据倾斜看起来会比较容易理解些，其实也是较易解决的。而计算倾斜发生得也很频繁，且情况更严重，解决起来也比较麻烦。解决方法整体上有两种分类：静态负载均衡，动态负载均衡。</p>
+
+<h3>2.1 静态负载均衡</h3>
+
+<p>严格意义上讲，静态负载均衡大多是进行算法优化，改变用户程序，使得整个作业的执行时间尽可能降低。这样的负载均衡一般都是需要对于当前的作业任务、输入数据特征和各个机器节点资源有先验知识。作业开始运行前，哪块数据在哪里进行计算都是可预测的，或者说是确定的，不管运行多少次都是这样一个状态。Hadoop提供的Partition接口就可以看做是一种静态负载均衡。下图展示了一个静态负载均衡的效果。</p>
+
+<p><img src="/images/analyzingloadbalancing/staticloadbalance.png" alt="static load banlance" /></p>
+
+<p>静态均衡很难用来解决计算倾斜的情形。大量的输入数据，想对每个分块的数据做计算量的估计是一个十分繁复且巨大的工作，而且没有通用性。</p>
+
+<h3>2.2 动态负载均衡</h3>
+
+<p>Hadoop平台中以Slot作为计算资源的分配单位，map任务和reduce任务都是运行在Slot上。Slot可以理解为单位计算资源，与cpu对应。由于存在数据倾斜或者计算倾斜每个任务的运行时间不同，可能会出现某个Slot已经完成任务空闲了，其他的Slot上还有大量的任务没有完成。显而易见，如果此时能够把其他Slot的任务放到这个Slot上来运行会大大提高系统的资源使用率，同时能够提升任务的处理效率及系统的吞吐量。相比于静态负载均衡，动态的均衡有多个优点。它不需要改变用户自己的应用代码，也不要针对不同的输入数据做算法定制优化，系统能够自动地完成均衡工作。</p>
+
+<p>动态均衡还有个优点，它可以用来解决计算倾斜的问题。动态均衡关注的是Slot的空闲与否，可以在运行时根据当前运行状况做出负载分配决策。</p>
+
+<p>相对而言动态均衡比静态均衡更难实现些，为了实现任务间的数据迁移工作需要增加任务间的数据传输模块及其他辅助功能。</p>
+
+<h3>2.3 关键技术</h3>
+
+<p>负载均衡过程中涉及到三个基本问题：Which，Where，How。</p>
+
+<p>Which&ndash; 目前系统中哪个节点的任务被当做Straggler，谁的任务重，需要被迁移。</p>
+
+<p>Where&ndash; 系统中哪个节点任务轻，可以多承担些工作，将重的任务迁移到这里。</p>
+
+<p>How&ndash; Straggler节点的任务如何迁移到空闲节点中去，而且保证系统的一致性、正确性。</p>
+
+<p><strong>静态</strong></p>
+
+<p>静态Which：对输入数据进行采样，分析作业，估算每个部分的代价（归约到时间运行值）超出均值的那些块为Straggler。</p>
+
+<p>静态Where：估值低于均值的块为要迁移任务到的空闲点。</p>
+
+<p>静态How：类似背包问题，但分配目标是各个背包的估计代价方差最小。</p>
+
+<p><strong>动态</strong></p>
+
+<p>动态Which：目前系统中出现空Slot时，正在运行的task都可以作为Straggler。从其中挑选一个作为Straggler，如何挑选也是通过代价估计。</p>
+
+<p>动态Where：即当前空闲的Slot，将任务迁移到这个Slot。</p>
+
+<p>动态How：
+    A. 直接法：选择当前系统运行中task剩余时间最长的为Straggler，考虑迁移时间，使Straggler和空闲节点处理迁移任务的时间一致。
+    B. 迭代法：考虑系统I/O问题，选择当前在同一个机器上的剩余时间最长的task为straggler，切分一半计算量到空闲节点；本地不够分再向其他机器请求切分。</p>
+
+<p><img src="/images/analyzingloadbalancing/dynamicdemo.png" alt="dynamic demo" /></p>
+
+<p>大概就像这样。</p>
+
+<h2>三、代价估计模型</h2>
+
+<p>上面提到的两种方案都需要有个代价估计，一半都是以计算时间作为标量。我们一般使用代价估计模型将不同的应用及对应的数据来将具体的作业情况做代价估计。</p>
+
+<h3>3.1 Map task估计</h3>
+
+<h3>3.2 Reduce task估计</h3>
+
+<h3>3.3 具体设计</h3>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce]]></title>
@@ -36,10 +127,13 @@
     2.2 用户先验知识的介入
 </code></pre>
 
-<p>负载均衡问题的解决在大多数情况下是存在一个极限的，这取决于具体问题的可划分性。
+<p>负载均衡问题的解决在大多数情况下是存在一个极限的，这取决于具体问题的可划分性(<a href="/blog/load-balancing-on-hadoop-mapreduce/#upbound">2.2中对此有讨论</a>)。
 分布式系统的负载均衡问题已经研究了多年了，有些问题早有了较成熟的解决方案，像分布式缓存系统中常见的一致性哈希算法等。在这里主要讨论的是分布式计算平台Hadoop里的负载均衡问题。</p>
 
-<p>后文会对这几种方式一一讨论，下面先对本文的主要讨论对象Hadoop的背景做个简要介绍。</p>
+<p><a href="/blog/analyzing-load-balancing-on-hadoop/">后文</a>会对这几种方式一一讨论，下面先对本文的主要讨论对象Hadoop的背景做个简要介绍。</p>
+
+<!--more-->
+
 
 <h2>二、Hadoop &ndash; 时代的宠儿</h2>
 
@@ -79,11 +173,16 @@
 
 <p>多数计算中即使多个键的FP被Shuffle到同一台机器上，处理时我们还是每次以一个键的FP作为独立的计算输入单元。因此，我们在写MapReduce程序时，应当需要注意的是：</p>
 
-<blockquote><p>不应当将程序计算的正确性依赖于Partition函数的实现，而只应将Partition函数作为一个提升系统数据均衡性的用户接口。</p></blockquote>
+<p><span id="upbound"></p>
 
-<p>上面这一点也是我们下面提出的各种负载均衡算法的基本依据。如果用户程序不满足上的条件，那么对于这种应用只能做Reduce任务分配级别的均衡，再低层的均衡会影响程序的正确性。而这种问题，Hadoop本身的推测执行机制基本能够满足需求，因此下文不做讨论。也是均衡算法的能达到的上界(单个Key的FP是Reduce输入数据的最小不可分单元)。在此，下面都假设用户作业满足上面的条件。</p>
+<blockquote><p>不应当将程序计算的正确性依赖于Partition函数的实现，而只应将Partition函数作为一个提升系统数据均衡性的用户接口。
+</span></p></blockquote>
 
-<p>本来准备继续写的，但是一篇博文过长感觉不太好，本文先到这里结束。文章简要介绍了负载均衡问题，并针对Hadoop平台上各个部分的运行机制分析了各个部分出现倾斜的情况。指出Hadoop平台上的负载均衡问题重点在Reduce部分。下一篇将详细分析Hadoop倾斜发生的原因及解决方案。</p>
+<p>上面这一点也是我们下面提出的各种负载均衡算法的基本依据。如果用户程序不满足上的条件，那么对于这种应用只能做Reduce任务分配级别的均衡，再低层的均衡会影响程序的正确性。而这种问题，Hadoop本身的推测执行机制基本能够满足需求，因此下文不做讨论。这也是均衡算法的能达到的上界(单个Key的FP是Reduce输入数据的最小不可分单元)。在此，下面都假设用户作业满足上面的条件。</p>
+
+<h2>结束语</h2>
+
+<p>本来准备继续写的，但是一篇博文过长感觉不太好，本文先到这里结束。文章简要介绍了负载均衡问题，并针对Hadoop平台上各个部分的运行机制分析了各个部分出现倾斜的情况。指出Hadoop平台上的负载均衡问题重点在Reduce部分。<a href="/blog/analyzing-load-balancing-on-hadoop/">下一篇将详细分析Hadoop倾斜发生的原因及解决方案</a>。</p>
 ]]></content>
   </entry>
   
