@@ -4,7 +4,7 @@
   <title><![CDATA[秦风汉雨]]></title>
   <link href="http://youli9056.github.io/atom.xml" rel="self"/>
   <link href="http://youli9056.github.io/"/>
-  <updated>2014-11-13T22:57:35+08:00</updated>
+  <updated>2014-11-17T11:06:29+08:00</updated>
   <id>http://youli9056.github.io/</id>
   <author>
     <name><![CDATA[You Li]]></name>
@@ -12,24 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[love you baby]]></title>
-    <link href="http://youli9056.github.io/blog/love-you-baby/"/>
-    <updated>2014-11-13T22:54:41+08:00</updated>
-    <id>http://youli9056.github.io/blog/love-you-baby</id>
-    <content type="html"><![CDATA[<h1><strong>LOVE YOU MY DEAR BABY &ndash; PJM</strong></h1>
-
-<h1><strong>PLEASE BE HAPPY</strong></h1>
-
-<h1><strong>DON&rsquo;T BE WORRY</strong></h1>
-
-<h1><strong>EVERYTHING IS GOING TO BE OKAY</strong></h1>
-
-<pre><code>*from yuri*
-</code></pre>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop]]></title>
