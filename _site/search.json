@@ -1,0 +1,91 @@
+[
+  
+    {
+      "title"    : "Spark 应用的常见性能考虑",
+      "category" : "",
+      "tags"     : "spark, performance, best-practice",
+      "url"      : "/blog/Spark-Best-Practice/",
+      "date"     : "2018-04-14 00:00:00 +0800"
+    } ,
+  
+    {
+      "title"    : "Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop",
+      "category" : "",
+      "tags"     : "hadoop, load balance, mapreduce",
+      "url"      : "/blog/analyzing-load-balancing-on-hadoop/",
+      "date"     : "2014-11-12 16:18:21 +0800"
+    } ,
+  
+    {
+      "title"    : "Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce",
+      "category" : "",
+      "tags"     : "load balance, hadoop, mapreduce",
+      "url"      : "/blog/load-balancing-on-hadoop-mapreduce/",
+      "date"     : "2014-11-08 11:34:58 +0800"
+    } ,
+  
+    {
+      "title"    : "Java(JVM)内存类型详解  Java(JVM) Memory Types",
+      "category" : "",
+      "tags"     : "",
+      "url"      : "/blog/java-jvm-memory-types/",
+      "date"     : "2014-11-07 22:46:35 +0800"
+    } ,
+  
+    {
+      "title"    : "Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java",
+      "category" : "",
+      "tags"     : "basics, java",
+      "url"      : "/blog/why-multiple-inheritance-is-not-supported-in-java/",
+      "date"     : "2014-11-06 21:43:11 +0800"
+    } ,
+  
+    {
+      "title"    : "接口和抽象类的区别",
+      "category" : "",
+      "tags"     : "basics, java",
+      "url"      : "/blog/diference-between-interface-and-abstract-class/",
+      "date"     : "2014-11-06 18:03:19 +0800"
+    } ,
+  
+    {
+      "title"    : "深入理解重载和重写及与之相关的多态性  Overloading and overriding",
+      "category" : "",
+      "tags"     : "java, basics",
+      "url"      : "/blog/overloading-and-overriding/",
+      "date"     : "2014-11-05 16:03:56 +0800"
+    } ,
+  
+    {
+      "title"    : "Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection",
+      "category" : "",
+      "tags"     : "gc, java, jvm",
+      "url"      : "/blog/monitoring-and-analyzing-java-garbage-collection/",
+      "date"     : "2014-11-05 13:20:34 +0800"
+    } ,
+  
+    {
+      "title"    : "Java垃圾回收机制三  Types of Java Garbage Collectors",
+      "category" : "",
+      "tags"     : "gc, java, jvm",
+      "url"      : "/blog/types-of-java-garbage-collectors/",
+      "date"     : "2014-11-05 11:07:33 +0800"
+    } ,
+  
+    {
+      "title"    : "Java垃圾回收机制一  简介--Java Garbage Collection Introduction",
+      "category" : "",
+      "tags"     : "gc, java, jvm",
+      "url"      : "/blog/java-garbage-collection-introduction/",
+      "date"     : "2014-11-04 15:49:16 +0800"
+    } ,
+  
+    {
+      "title"    : "Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?",
+      "category" : "",
+      "tags"     : "Java, GC, JVM",
+      "url"      : "/blog/java-gc-management/",
+      "date"     : "2014-10-22 19:34:46 +0800"
+    } 
+  
+]

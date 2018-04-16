@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Spark 应用的常见性能考虑 - Yuri's Blog</title>
+	<meta name="description" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/blog/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/blog/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/blog/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/blog/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#311e3e">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#311e3e">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/blog/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/blog/assets/css/main.css">
+</head>
+
+<body>
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+      </div>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+	  <li><a href="/blog/tags/#Tech">Tech</a></li>
+	  <li><a href="/blog/tags/#Life">Life</a></li>
+          <li><a href="/blog/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/blog/">秦风汉雨</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
+      </div>
+    </div>
+  </div>
+</header> <!-- End Header -->
+
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Spark 应用的常见性能考虑</h1>
+          <div class="page-date"><time datetime="2018-04-14 00:00:00 +0800">2018, Apr 14</time></div>
+        </div>
+        <h2 id="general-idea">General Idea</h2>
+<p>最近工作中用了些Spark，了解稍多些后感觉Spark和Hadoop还是一脉相承的，两者虽有着明显的不同，但是在优化方面却更多的是相通之处。考虑的因素还是减少重复计算，减少网络传输，充分利用计算资源。常见的Spark优化trick大概就下面这几点。</p>
+<ul>
+  <li>避免Shuffle</li>
+  <li>缓存多次使用的中间结果</li>
+  <li>适当调整并行度</li>
+  <li>使用好BroadCast Variable和Accumulator</li>
+  <li>Tuning GC</li>
+</ul>
+
+<p>写应用的时候不妨先画出数据转换DAG，可能帮助你一眼就找到一个不错到方案。</p>
+
+<p>另外，代码优化的那句老话‘切勿提前优化’可能在数据处理方面不是很合适。提前优化或者有意识的注意性能很重要，一段毫秒级的延迟在micro sevice的一次调用来看可能没必要去影响结构去优化，而在
+big data的环境中大量的数据集中并放大了可能的每一点优势，越早有意识优化越能减少后期的改动。</p>
+
+<h2 id="避免shuffle">避免Shuffle</h2>
+<p>Shuffule 从Hadoop MapReduce开始就广为诟病，Spark的Shufulle虽然不像Hadoop一样强调必须做有序的Shuffle，但是在大量数据的加持下Shuffle带来的网络数据传输，Reducer内存消耗还是相当可观的。和Hadoop一样，Spark中也应当将计算前移，能在Map端做的工作尽量在Map端做，能在Map端aggregate的数据尽量在Map端aggregate。</p>
+
+<h3 id="reducebykey---aggregatebykey---combinebykey---broupbykey"><em>ReduceByKey -&gt; AggregateByKey -&gt; CombineByKey -&gt; BroupByKey</em></h3>
+<p>Spark中ReduceByKey，AggregateByKey, CombineByKey and GroupByKey是常见的会导致Shuffle的操作
+。大概了解下这四种操作是如何工作的就能很容易理解为甚么这四个操作从ReduceByKey到GroupByKey使用的优先级依次降低了。</p>
+<h4 id="reducebykey">ReduceByKey</h4>
+<h4 id="aggregatebykey">AggregateByKey</h4>
+<h4 id="combinebykey">CombineByKey</h4>
+<h4 id="groupbykey">GroupByKey</h4>
+<h3 id="coalesce-partition">Coalesce Partition</h3>
+<h3 id="maintain-partition">Maintain Partition</h3>
+<h2 id="缓存中间结果">缓存中间结果</h2>
+<p>Cache
+Persist Level</p>
+<h2 id="调整并行度">调整并行度</h2>
+<h3 id="partition">Partition</h3>
+<h4 id="more-partition-more-parallelism">More Partition More Parallelism</h4>
+<h4 id="less-partition-less-overhead">Less Partition Less Overhead</h4>
+<p>TreeReduce &amp; TreeAggregation</p>
+<h2 id="broadcast-variable--accumulator">Broadcast variable &amp; Accumulator</h2>
+
+<h2 id="tuning-gc">Tuning GC</h2>
+<h3 id="intermediate-objects">Intermediate Objects</h3>
+<h3 id="serialization">Serialization</h3>
+<h2 id="other-tiny-points">Other Tiny Points</h2>
+<h3 id="collect-or-count-large-rdd">Collect or count large RDD</h3>
+
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/blog/tags#spark" class="tag">| spark</a>
+            
+            <a href="/blog/tags#performance" class="tag">| performance</a>
+            
+            <a href="/blog/tags#best-practice" class="tag">| best-practice</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Spark 应用的常见性能考虑&url=http://localhost:4000/Spark-Best-Practice/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://localhost:4000/Spark-Best-Practice/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://localhost:4000/Spark-Best-Practice/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/blog/assets/img/youli-face.jpg" alt="秦风汉雨" class="author-img">
+  <div class="author-desc">
+    <h2>秦风汉雨</h2>
+    <p>My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.</p>
+    <ul>
+      
+        <li class="email"><a href="mailto:youli9056@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+      
+        <li class="website"><a href="http://youli9056.github.io" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+    </ul>
+  </div>
+</section>
+
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
+    
+      
+        <a href="/blog/Spark-Best-Practice/" class="recent-item" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"><span>Spark 应用的常见性能考虑</span></a>
+      
+    
+      
+        <a href="/blog/analyzing-load-balancing-on-hadoop/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</span></a>
+      
+    
+      
+        <a href="/blog/load-balancing-on-hadoop-mapreduce/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</span></a>
+      
+    
+      
+        <a href="/blog/java-jvm-memory-types/" class="recent-item" style="background: url(/blog/assets/img/ice.jpg) center no-repeat; background-size: cover;"><span>Java(JVM)内存类型详解  Java(JVM) Memory Types</span></a>
+      
+    
+      
+        <a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="recent-item" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"><span>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</span></a>
+      
+    
+      
+        <a href="/blog/diference-between-interface-and-abstract-class/" class="recent-item" style="background: url(/blog/assets/img/cinecite.jpg) center no-repeat; background-size: cover;"><span>接口和抽象类的区别</span></a>
+      
+    
+      
+        <a href="/blog/overloading-and-overriding/" class="recent-item" style="background: url(/blog/assets/img/20180411.png) center no-repeat; background-size: cover;"><span>深入理解重载和重写及与之相关的多态性  Overloading and overriding</span></a>
+      
+    
+      
+        <a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="recent-item" style="background: url(/blog/assets/img/polar-lights.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</span></a>
+      
+    
+      
+        <a href="/blog/types-of-java-garbage-collectors/" class="recent-item" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制三  Types of Java Garbage Collectors</span></a>
+      
+    
+      
+        <a href="/blog/java-garbage-collection-introduction/" class="recent-item" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制一  简介--Java Garbage Collection Introduction</span></a>
+      
+    
+      
+        <a href="/blog/java-gc-management/" class="recent-item" style="background: url(/blog/assets/img/grass.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?</span></a>
+      
+    
+  </div>
+</div> <!-- End Recent-Box -->
+
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
+
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yuri.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
+  <div class="wrapper">
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; 秦风汉雨</p>
+  </div>
+</footer> <!-- End Footer -->
+
+</div>
+
+  <!-- JS -->
+<script src="/blog/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/blog/assets/js/jekyll-search.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/blog/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
+</script>
+<script src="/blog/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-55942851-1', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>

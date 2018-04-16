@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Java垃圾回收机制三  Types of Java Garbage Collectors - Yuri's Blog</title>
+	<meta name="description" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/blog/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/blog/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/blog/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/blog/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#311e3e">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#311e3e">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/blog/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/blog/assets/css/main.css">
+</head>
+
+<body>
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+      </div>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+	  <li><a href="/blog/tags/#Tech">Tech</a></li>
+	  <li><a href="/blog/tags/#Life">Life</a></li>
+          <li><a href="/blog/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/blog/">秦风汉雨</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
+      </div>
+    </div>
+  </div>
+</header> <!-- End Header -->
+
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Java垃圾回收机制三  Types of Java Garbage Collectors</h1>
+          <div class="page-date"><time datetime="2014-11-05 11:07:33 +0800">2014, Nov 05</time></div>
+        </div>
+        <p>本文是Java垃圾回收系列的第三篇，非原创，翻译自<a href="http://javapapers.com/java/types-of-java-garbage-collectors/">Types of Java Garbage Collectors</a>。如果没有相应基础的话，阅读本文前建议先阅读前两篇<a href="/blog/java-garbage-collection-introduction/">Java Garbage Collection Introduction</a>(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和<a href="/blog/java-gc-management/">How Java Garbage Collection Works?</a>(概况介绍了GC是如何工作的)</p>
+
+<p>本文将会介绍各种不同类型的Java垃圾回收器。垃圾回收是Java用来将程序员从分配和释放内存的琐事中解放出来的自动过程。</p>
+
+<p>Java有四种类型的垃圾回收器，</p>
+
+<ol>
+  <li><a href="/blog/types-of-java-garbage-collectors/#serial-garbage-collector">Serial Garbage Collector</a></li>
+  <li><a href="/blog/types-of-java-garbage-collectors/#parallel-garbage-collector">Parallel Garbage Collector</a></li>
+  <li><a href="/blog/types-of-java-garbage-collectors/#cms-garbage-collector">CMS Garbage Collector</a></li>
+  <li><a href="/blog/types-of-java-garbage-collectors/#g1-garbage-collector">G1 Garbage Collector</a></li>
+</ol>
+
+<p><img src="Types-of-Java-Garbage-Collectors3_th_thumb.jpg" alt="各种类型的Java垃圾回收器" />
+<!--more-->
+这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。</p>
+
+<h2 id="1-serial-garbage-collector">1. <span id="serial-garbage-collector">Serial Garbage Collector</span></h2>
+
+<p>串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。</p>
+
+<p>使用<code class="highlighter-rouge">-XX:+UseSerialGC</code>JVM参数来开启使用串行垃圾回收器。</p>
+
+<h2 id="2-parallel-garbage-collector">2.<span id="parallel-garbage-collector"> Parallel Garbage Collector</span></h2>
+
+<p>并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。</p>
+
+<h2 id="3-cms-garbage-collector">3.<span id="cms-garbage-collector"> CMS Garbage Collector</span></h2>
+
+<p>并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，</p>
+
+<ol>
+  <li>在老年代中标记引用对象的时候</li>
+  <li>在做垃圾回收的过程中堆内存中有变化发生</li>
+</ol>
+
+<p>对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。</p>
+
+<p>使用<code class="highlighter-rouge">-XX:+UseParNewGC</code>JVM参数来开启使用CMS垃圾回收器。</p>
+
+<h2 id="4-g1-garbage-collector">4.<span id="g1-garbage-collector"> G1 Garbage Collector</span></h2>
+
+<p>G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。</p>
+
+<p>使用<code class="highlighter-rouge">-XX:UseG1GC</code>JVM参数来开启使用G1垃圾回收器。</p>
+
+<p><strong>Java 8 的优化</strong></p>
+
+<p>在使用G1垃圾回收器是，开启使用<code class="highlighter-rouge">-XX:+UseStringDeduplacaton</code>JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是<em>Java 8 u 20</em>引入的选项。</p>
+
+<p>以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。</p>
+
+<h2 id="garbage-collection-jvm-options">Garbage Collection JVM Options</h2>
+
+<p>下面是些主要的与Java垃圾回收相关的JVM选项。</p>
+
+<h3 id="type-of-garbage-collector-to-run">Type of Garbage Collector to run</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>选项</th>
+      <th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-XX:+UseSerialGC</td>
+      <td>串行垃圾回收器</td>
+    </tr>
+    <tr>
+      <td>-XX:+UseParallelGC</td>
+      <td>并行垃圾回收器</td>
+    </tr>
+    <tr>
+      <td>-XX:+UseConcMarkSweepGC</td>
+      <td>CMS垃圾回收器</td>
+    </tr>
+    <tr>
+      <td>-XX:ParallesCMSThread=</td>
+      <td>CMS垃圾回收器–使用的线程数量</td>
+    </tr>
+    <tr>
+      <td>-XX:UseG1GC</td>
+      <td>G1垃圾回收器</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="gc-优化选项">GC 优化选项</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>选项</th>
+      <th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>-Xms</td>
+      <td>初始堆内存大小</td>
+    </tr>
+    <tr>
+      <td>-Xmx</td>
+      <td>最大堆内存大小</td>
+    </tr>
+    <tr>
+      <td>-Xmn</td>
+      <td>年轻代的大小</td>
+    </tr>
+    <tr>
+      <td>-XX:PermSize</td>
+      <td>初始永久代的大小</td>
+    </tr>
+    <tr>
+      <td>-XX:MaxPermSize</td>
+      <td>最大的永久代的大小</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="example-usage-of-jvm-gc-options">Example Usage of JVM GC Options</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
+</code></pre></div></div>
+
+<p>在垃圾回收系列的<a href="/blog/monitoring-and-analyzing-java-garbage-collection/">下一篇</a>中，将通过一个例子介绍如何区监控和分析垃圾回收。</p>
+
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/blog/tags#gc" class="tag">| gc</a>
+            
+            <a href="/blog/tags#java" class="tag">| java</a>
+            
+            <a href="/blog/tags#jvm" class="tag">| jvm</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Java垃圾回收机制三  Types of Java Garbage Collectors&url=http://localhost:4000/types-of-java-garbage-collectors/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://localhost:4000/types-of-java-garbage-collectors/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://localhost:4000/types-of-java-garbage-collectors/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/blog/assets/img/youli-face.jpg" alt="秦风汉雨" class="author-img">
+  <div class="author-desc">
+    <h2>秦风汉雨</h2>
+    <p>My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.</p>
+    <ul>
+      
+        <li class="email"><a href="mailto:youli9056@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+      
+        <li class="website"><a href="http://youli9056.github.io" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+    </ul>
+  </div>
+</section>
+
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
+    
+      
+        <a href="/blog/Spark-Best-Practice/" class="recent-item" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"><span>Spark 应用的常见性能考虑</span></a>
+      
+    
+      
+        <a href="/blog/analyzing-load-balancing-on-hadoop/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</span></a>
+      
+    
+      
+        <a href="/blog/load-balancing-on-hadoop-mapreduce/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</span></a>
+      
+    
+      
+        <a href="/blog/java-jvm-memory-types/" class="recent-item" style="background: url(/blog/assets/img/ice.jpg) center no-repeat; background-size: cover;"><span>Java(JVM)内存类型详解  Java(JVM) Memory Types</span></a>
+      
+    
+      
+        <a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="recent-item" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"><span>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</span></a>
+      
+    
+      
+        <a href="/blog/diference-between-interface-and-abstract-class/" class="recent-item" style="background: url(/blog/assets/img/cinecite.jpg) center no-repeat; background-size: cover;"><span>接口和抽象类的区别</span></a>
+      
+    
+      
+        <a href="/blog/overloading-and-overriding/" class="recent-item" style="background: url(/blog/assets/img/20180411.png) center no-repeat; background-size: cover;"><span>深入理解重载和重写及与之相关的多态性  Overloading and overriding</span></a>
+      
+    
+      
+        <a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="recent-item" style="background: url(/blog/assets/img/polar-lights.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</span></a>
+      
+    
+      
+        <a href="/blog/types-of-java-garbage-collectors/" class="recent-item" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制三  Types of Java Garbage Collectors</span></a>
+      
+    
+      
+        <a href="/blog/java-garbage-collection-introduction/" class="recent-item" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制一  简介--Java Garbage Collection Introduction</span></a>
+      
+    
+      
+        <a href="/blog/java-gc-management/" class="recent-item" style="background: url(/blog/assets/img/grass.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?</span></a>
+      
+    
+  </div>
+</div> <!-- End Recent-Box -->
+
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
+
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yuri.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
+  <div class="wrapper">
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; 秦风汉雨</p>
+  </div>
+</footer> <!-- End Footer -->
+
+</div>
+
+  <!-- JS -->
+<script src="/blog/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/blog/assets/js/jekyll-search.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/blog/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
+</script>
+<script src="/blog/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-55942851-1', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+title: Yuri's Blog
+email: youli9056@gmail.com
+description: Staying Alive > # this means to ignore newlines until "baseurl:"
+permalink: '/:title/'
+baseurl: "/blog" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
+# Author settings
+author: 秦风汉雨 # add your name
+author-pic: youli-face.jpg
+about-author: My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.
+
+# Contact links
+email: youli9056@gmail.com # Add your Email address
+website: youli9056.github.io # Add your website, do not add http://
+linkedin: # Add your Linkedin handle
+github: #artemsheludko # Add your Github handle
+facebook: # Add your Facebook handle
+instagram: # Add your Instagram handle
+pinterest: # Add your Pinterest handle
+
+# Newsletter
+mailchimp: # Add your MailChimp form identifier.
+
+# Disqus
+discus_identifier: yuri # Add your discus identifier
+
+# Tracker
+analytics: UA-55942851-1 # Google Analytics
+
+# Paginate
+paginate: 8
+paginate_path: /page:num/
+
+# Build settings
+markdown: kramdown
+
+plugins:
+  - jekyll-paginate
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-postfiles
+  - jekyll-github-metadata
+
+include: [_pages]
+exclude: ["node_modules", "gulpfile.js", "package.json", "yarn.lock"]

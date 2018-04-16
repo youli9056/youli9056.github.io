@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2018-04-16T19:33:09+08:00</updated><id>http://localhost:4000/blog/</id><title type="html">Yuri’s Blog</title><subtitle>Staying Alive &gt;</subtitle><author><name>秦风汉雨</name></author><entry><title type="html">Spark 应用的常见性能考虑</title><link href="http://localhost:4000/blog/Spark-Best-Practice/" rel="alternate" type="text/html" title="Spark 应用的常见性能考虑" /><published>2018-04-14T00:00:00+08:00</published><updated>2018-04-14T00:00:00+08:00</updated><id>http://localhost:4000/blog/Spark-Best-Practice</id><content type="html" xml:base="http://localhost:4000/blog/Spark-Best-Practice/">&lt;h2 id=&quot;general-idea&quot;&gt;General Idea&lt;/h2&gt;
+&lt;p&gt;最近工作中用了些Spark，了解稍多些后感觉Spark和Hadoop还是一脉相承的，两者虽有着明显的不同，但是在优化方面却更多的是相通之处。考虑的因素还是减少重复计算，减少网络传输，充分利用计算资源。常见的Spark优化trick大概就下面这几点。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;避免Shuffle&lt;/li&gt;
+  &lt;li&gt;缓存多次使用的中间结果&lt;/li&gt;
+  &lt;li&gt;适当调整并行度&lt;/li&gt;
+  &lt;li&gt;使用好BroadCast Variable和Accumulator&lt;/li&gt;
+  &lt;li&gt;Tuning GC&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;写应用的时候不妨先画出数据转换DAG，可能帮助你一眼就找到一个不错到方案。&lt;/p&gt;
+
+&lt;p&gt;另外，代码优化的那句老话‘切勿提前优化’可能在数据处理方面不是很合适。提前优化或者有意识的注意性能很重要，一段毫秒级的延迟在micro sevice的一次调用来看可能没必要去影响结构去优化，而在
+big data的环境中大量的数据集中并放大了可能的每一点优势，越早有意识优化越能减少后期的改动。&lt;/p&gt;
+
+&lt;h2 id=&quot;避免shuffle&quot;&gt;避免Shuffle&lt;/h2&gt;
+&lt;p&gt;Shuffule 从Hadoop MapReduce开始就广为诟病，Spark的Shufulle虽然不像Hadoop一样强调必须做有序的Shuffle，但是在大量数据的加持下Shuffle带来的网络数据传输，Reducer内存消耗还是相当可观的。和Hadoop一样，Spark中也应当将计算前移，能在Map端做的工作尽量在Map端做，能在Map端aggregate的数据尽量在Map端aggregate。&lt;/p&gt;
+
+&lt;h3 id=&quot;reducebykey---aggregatebykey---combinebykey---broupbykey&quot;&gt;&lt;em&gt;ReduceByKey -&amp;gt; AggregateByKey -&amp;gt; CombineByKey -&amp;gt; BroupByKey&lt;/em&gt;&lt;/h3&gt;
+&lt;p&gt;Spark中ReduceByKey，AggregateByKey, CombineByKey and GroupByKey是常见的会导致Shuffle的操作
+。大概了解下这四种操作是如何工作的就能很容易理解为甚么这四个操作从ReduceByKey到GroupByKey使用的优先级依次降低了。&lt;/p&gt;
+&lt;h4 id=&quot;reducebykey&quot;&gt;ReduceByKey&lt;/h4&gt;
+&lt;h4 id=&quot;aggregatebykey&quot;&gt;AggregateByKey&lt;/h4&gt;
+&lt;h4 id=&quot;combinebykey&quot;&gt;CombineByKey&lt;/h4&gt;
+&lt;h4 id=&quot;groupbykey&quot;&gt;GroupByKey&lt;/h4&gt;
+&lt;h3 id=&quot;coalesce-partition&quot;&gt;Coalesce Partition&lt;/h3&gt;
+&lt;h3 id=&quot;maintain-partition&quot;&gt;Maintain Partition&lt;/h3&gt;
+&lt;h2 id=&quot;缓存中间结果&quot;&gt;缓存中间结果&lt;/h2&gt;
+&lt;p&gt;Cache
+Persist Level&lt;/p&gt;
+&lt;h2 id=&quot;调整并行度&quot;&gt;调整并行度&lt;/h2&gt;
+&lt;h3 id=&quot;partition&quot;&gt;Partition&lt;/h3&gt;
+&lt;h4 id=&quot;more-partition-more-parallelism&quot;&gt;More Partition More Parallelism&lt;/h4&gt;
+&lt;h4 id=&quot;less-partition-less-overhead&quot;&gt;Less Partition Less Overhead&lt;/h4&gt;
+&lt;p&gt;TreeReduce &amp;amp; TreeAggregation&lt;/p&gt;
+&lt;h2 id=&quot;broadcast-variable--accumulator&quot;&gt;Broadcast variable &amp;amp; Accumulator&lt;/h2&gt;
+
+&lt;h2 id=&quot;tuning-gc&quot;&gt;Tuning GC&lt;/h2&gt;
+&lt;h3 id=&quot;intermediate-objects&quot;&gt;Intermediate Objects&lt;/h3&gt;
+&lt;h3 id=&quot;serialization&quot;&gt;Serialization&lt;/h3&gt;
+&lt;h2 id=&quot;other-tiny-points&quot;&gt;Other Tiny Points&lt;/h2&gt;
+&lt;h3 id=&quot;collect-or-count-large-rdd&quot;&gt;Collect or count large RDD&lt;/h3&gt;</content><author><name>秦风汉雨</name></author><category term="spark" /><category term="performance" /><category term="best-practice" /><summary type="html">General Idea 最近工作中用了些Spark，了解稍多些后感觉Spark和Hadoop还是一脉相承的，两者虽有着明显的不同，但是在优化方面却更多的是相通之处。考虑的因素还是减少重复计算，减少网络传输，充分利用计算资源。常见的Spark优化trick大概就下面这几点。 避免Shuffle 缓存多次使用的中间结果 适当调整并行度 使用好BroadCast Variable和Accumulator Tuning GC</summary></entry><entry><title type="html">Hadoop MapReduce中的负载均衡问题二 详细分析及现有方案 Analyzing Load Balancing on Hadoop</title><link href="http://localhost:4000/blog/analyzing-load-balancing-on-hadoop/" rel="alternate" type="text/html" title="Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop" /><published>2014-11-12T16:18:21+08:00</published><updated>2014-11-12T16:18:21+08:00</updated><id>http://localhost:4000/blog/analyzing-load-balancing-on-hadoop</id><content type="html" xml:base="http://localhost:4000/blog/analyzing-load-balancing-on-hadoop/">&lt;p&gt;在&lt;a href=&quot;/blog/load-balancing-on-hadoop-mapreduce/&quot;&gt;上一篇&lt;/a&gt;中，简单介绍了&lt;a href=&quot;/blog/load-balancing-on-hadoop-mapreduce/&quot;&gt;负载均衡问题&lt;/a&gt;，及其在Hadoop MapReduce平台中的表现。这里详细点，并介绍一些解决方案。&lt;/p&gt;
+
+&lt;h2 id=&quot;一倾斜类型&quot;&gt;一、倾斜类型&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;数据倾斜&lt;/p&gt;
+
+    &lt;p&gt;输入数据分布不均，有些节点处理的数据远大于其他节点。可能会出现下面的情况，有个Join操作（reduce端join）输出数据量的大小&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;reducesidejoin.png&quot; alt=&quot;reduce side join output&quot; /&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;计算倾斜&lt;/p&gt;
+
+    &lt;p&gt;运算的复杂度与输入的数据量关系不大，而取决于输入数据的特性。例如，PageRank这样的算法，一个节点的计算复杂度是于这个节点的出度有关，即使分配到一个计算节点上的数据相等，它们的实际运算时间由于度数的差别，还是会出现类似下图这样的情况。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;computeunbalance.png&quot; alt=&quot;compute unbalance&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;二解决方案&quot;&gt;二、解决方案&lt;/h2&gt;
+
+&lt;p&gt;两种倾斜方式中数据倾斜看起来会比较容易理解些，其实也是较易解决的。而计算倾斜发生得也很频繁，且情况更严重，解决起来也比较麻烦。解决方法整体上有两种分类：静态负载均衡，动态负载均衡。&lt;/p&gt;
+
+&lt;h3 id=&quot;21-静态负载均衡&quot;&gt;2.1 静态负载均衡&lt;/h3&gt;
+
+&lt;p&gt;严格意义上讲，静态负载均衡大多是进行算法优化，改变用户程序，使得整个作业的执行时间尽可能降低。这样的负载均衡一般都是需要对于当前的作业任务、输入数据特征和各个机器节点资源有先验知识。作业开始运行前，哪块数据在哪里进行计算都是可预测的，或者说是确定的，不管运行多少次都是这样一个状态。Hadoop提供的Partition接口就可以看做是一种静态负载均衡。下图展示了一个静态负载均衡的效果。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;staticloadbalance.png&quot; alt=&quot;static load banlance&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;静态均衡很难用来解决计算倾斜的情形。大量的输入数据，想对每个分块的数据做计算量的估计是一个十分繁复且巨大的工作，而且没有通用性。&lt;/p&gt;
+
+&lt;h3 id=&quot;22-动态负载均衡&quot;&gt;2.2 动态负载均衡&lt;/h3&gt;
+
+&lt;p&gt;Hadoop平台中以Slot作为计算资源的分配单位，map任务和reduce任务都是运行在Slot上。Slot可以理解为单位计算资源，与cpu对应。由于存在数据倾斜或者计算倾斜每个任务的运行时间不同，可能会出现某个Slot已经完成任务空闲了，其他的Slot上还有大量的任务没有完成。显而易见，如果此时能够把其他Slot的任务放到这个Slot上来运行会大大提高系统的资源使用率，同时能够提升任务的处理效率及系统的吞吐量。相比于静态负载均衡，动态的均衡有多个优点。它不需要改变用户自己的应用代码，也不要针对不同的输入数据做算法定制优化，系统能够自动地完成均衡工作。&lt;/p&gt;
+
+&lt;p&gt;动态均衡还有个优点，它可以用来解决计算倾斜的问题。动态均衡关注的是Slot的空闲与否，可以在运行时根据当前运行状况做出负载分配决策。&lt;/p&gt;
+
+&lt;p&gt;相对而言动态均衡比静态均衡更难实现些，为了实现任务间的数据迁移工作需要增加任务间的数据传输模块及其他辅助功能。&lt;/p&gt;
+
+&lt;h3 id=&quot;23-关键技术&quot;&gt;2.3 关键技术&lt;/h3&gt;
+
+&lt;p&gt;负载均衡过程中涉及到三个基本问题：Which，Where，How。&lt;/p&gt;
+
+&lt;p&gt;Which– 目前系统中哪个节点的任务被当做Straggler，谁的任务重，需要被迁移。&lt;/p&gt;
+
+&lt;p&gt;Where– 系统中哪个节点任务轻，可以多承担些工作，将重的任务迁移到这里。&lt;/p&gt;
+
+&lt;p&gt;How– Straggler节点的任务如何迁移到空闲节点中去，而且保证系统的一致性、正确性。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;静态&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;静态Which：对输入数据进行采样，分析作业，估算每个部分的代价（归约到时间运行值）超出均值的那些块为Straggler。&lt;/p&gt;
+
+&lt;p&gt;静态Where：估值低于均值的块为要迁移任务到的空闲点。&lt;/p&gt;
+
+&lt;p&gt;静态How：类似背包问题，但分配目标是各个背包的估计代价方差最小。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;动态&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;动态Which：目前系统中出现空Slot时，正在运行的task都可以作为Straggler。从其中挑选一个作为Straggler，如何挑选也是通过代价估计。&lt;/p&gt;
+
+&lt;p&gt;动态Where：即当前空闲的Slot，将任务迁移到这个Slot。&lt;/p&gt;
+
+&lt;p&gt;动态How：
+	A. 直接法：选择当前系统运行中task剩余时间最长的为Straggler，考虑迁移时间，使Straggler和空闲节点处理迁移任务的时间一致。
+	B. 迭代法：考虑系统I/O问题，选择当前在同一个机器上的剩余时间最长的task为straggler，切分一半计算量到空闲节点；本地不够分再向其他机器请求切分。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;dynamicdemo.png&quot; alt=&quot;dynamic demo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;大概就像这样。&lt;/p&gt;
+
+&lt;h2 id=&quot;三代价估计模型&quot;&gt;三、代价估计模型&lt;/h2&gt;
+
+&lt;p&gt;上面提到的两种方案都需要有个代价估计，一半都是以计算时间作为标量。我们一般使用代价估计模型将不同的应用及对应的数据来将具体的作业情况做代价估计。&lt;/p&gt;
+
+&lt;h3 id=&quot;31-map-task估计&quot;&gt;3.1 Map task估计&lt;/h3&gt;
+
+&lt;h3 id=&quot;32-reduce-task估计&quot;&gt;3.2 Reduce task估计&lt;/h3&gt;
+
+&lt;h3 id=&quot;33-具体设计&quot;&gt;3.3 具体设计&lt;/h3&gt;
+
+&lt;p&gt;这个坑挖了好久，已经想不起来该怎么填了。悔不当初。留下以当鞭戒！&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="hadoop" /><category term="load balance" /><category term="mapreduce" /><summary type="html">在上一篇中，简单介绍了负载均衡问题，及其在Hadoop MapReduce平台中的表现。这里详细点，并介绍一些解决方案。</summary></entry><entry><title type="html">Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</title><link href="http://localhost:4000/blog/load-balancing-on-hadoop-mapreduce/" rel="alternate" type="text/html" title="Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce" /><published>2014-11-08T11:34:58+08:00</published><updated>2014-11-08T11:34:58+08:00</updated><id>http://localhost:4000/blog/load-balancing-on-hadoop-mapreduce</id><content type="html" xml:base="http://localhost:4000/blog/load-balancing-on-hadoop-mapreduce/">&lt;p&gt;做了一段时间的Hadoop中的负载均衡问题，记下些流水账。&lt;/p&gt;
+
+&lt;h2 id=&quot;一负载均衡--一个广泛而普遍存在的问题&quot;&gt;一、负载均衡 – 一个广泛而普遍存在的问题&lt;/h2&gt;
+
+&lt;p&gt;负载均衡问题是一个广泛而普遍存在的问题。在所有的分布式系统中几乎都会提及到“长尾问题(Long Tail Problem)”，其实也就是大家常说的“短板理论”，系统的整体表现取决于表现最差的一部分。常见的分布式系统如分布式缓存，分布式存储，分布式计算，分布式数据库等等，都存在这个问题。分布式缓存中可能会遇到短时间内集中访问同一个缓存的情况；分布式存储可能单机磁盘使用过度；分布式计算可能会有单点的计算负担过重；分布式数据库可能会有单机访问量过大。如此总总，只要是分布的，想完全端平一碗水几乎是不大可能的。&lt;/p&gt;
+
+&lt;p&gt;在此，总结我对负载均衡的定义：在多点协作的系统中由于不合理的任务分配导致某个或者少量的某些节点处理负担过重，最终拖延整个系统对外的响应效率。&lt;/p&gt;
+
+&lt;p&gt;负载均衡的解决思路主要有：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1. 被动解决，发现负载倾斜后，将负载迁移到空闲节点
+2. 主动预防，防止倾斜的发生
+	2.1 系统任务分配方式主动预防
+		2.1.1 静态负载均衡
+		2.1.2 动态负载均衡
+	2.2 用户先验知识的介入
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;负载均衡问题的解决在大多数情况下是存在一个极限的，这取决于具体问题的可划分性(&lt;a href=&quot;/blog/load-balancing-on-hadoop-mapreduce/#upbound&quot;&gt;2.2中对此有讨论&lt;/a&gt;)。
+分布式系统的负载均衡问题已经研究了多年了，有些问题早有了较成熟的解决方案，像分布式缓存系统中常见的一致性哈希算法等。在这里主要讨论的是分布式计算平台Hadoop里的负载均衡问题。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/blog/analyzing-load-balancing-on-hadoop/&quot;&gt;后文&lt;/a&gt;会对这几种方式一一讨论，下面先对本文的主要讨论对象Hadoop的背景做个简要介绍。
+&lt;!--more--&gt;&lt;/p&gt;
+&lt;h2 id=&quot;二hadoop&quot;&gt;二、Hadoop&lt;/h2&gt;
+
+&lt;p&gt;Hadoop自推出以后在互联网快速发展的背景下得到了许多公司的认可，已然成为大数据的基础处理平台甚至是行业标准。Facebook，Amazon，Yahoo等等公司都在自己的系统中构建了基于Hadoop的处理平台。除了最基本的数据处理功能，在Hadoop之上现在已经发展出来一套生态系统，应用最广泛的莫过于Hive和HBase了。在Hadoop之上构建的系统都直接或间接地使用了了Hadoop的分布式存储模块HDFS和计算模块MapReduce。本文的问题关注计算模块MapReduce的均衡问题。&lt;/p&gt;
+
+&lt;h3 id=&quot;21-hdfs&quot;&gt;2.1 HDFS&lt;/h3&gt;
+&lt;p&gt;HDFS借鉴的是Google的GFS系统，是一个基于Key/Value的分布式存储系统。HDFS是为了大文件、一次写多次读的应用场景而设计的。所有要存储在HDFS中的文件需要按块（默认64M）切分，每个数据块有在不同的机器上（默认是本机，本机架，不同机架）有多个备份（默认为3份）。系统通过对失败机器数据文件的再分配、复制来自动保证文件的数据安全。HDFS并不适合大量小文件或者对写要求高的场景。这样，我们可以有个概念，Hadoop中处理的数据会分块备份三分存在不同的机器上。&lt;/p&gt;
+
+&lt;p&gt;HDFS本身也存在负载均衡问题，这个负载的均衡主要只每台机器的磁盘使用率。假如有一台机器存储了大量的数据，而其他机器存储了很少，这就是一个倾斜的情形。HDFS的存储倾斜不仅仅只影响到磁盘使用情况，同时由于Hadoop的Map的执行依赖于输入数据在磁盘上的分布情况（Hadoop期望达到最好的数据本地化处理）它也影响到Map计算过程中的均衡。HDFS存储的不均很有可能导致Map计算的分布不均（注意是有可能，因为HDFS上的输入数据有多个备份，Map的输入只需要一份备份，因此不一定会导致Map计算不均）。&lt;/p&gt;
+
+&lt;p&gt;对于HDFS的倾斜问题，Hadoop本身提供了一套机制来限制不均衡的程度。Hadoop自带的工具&lt;code class=&quot;highlighter-rouge&quot;&gt;bin/start-balancer.sh&lt;/code&gt;可以通过参数指定系统中均衡的标准如10%，这就保证了系统中磁盘的使用率的偏差在10%之内。如果超过了这个值，系统将自动执行数据块的重分布工作使之达到偏差限额。&lt;/p&gt;
+
+&lt;h3 id=&quot;22-mapreduce&quot;&gt;2.2 MapReduce&lt;/h3&gt;
+
+&lt;p&gt;MapReduce是Hadoop的数据处理模块，算是函数式编程的巅峰之作了吧。Hadoop对数据的处理都被抽象成Map和Reduce这两个函数的操作。&lt;/p&gt;
+
+&lt;h4 id=&quot;map&quot;&gt;Map&lt;/h4&gt;
+
+&lt;p&gt;通常地，Map函数的工作是从HDFS中读取上输入文件，读入的数据是一个个（MapInputKey/MapInputValue）对，根据作业需求处理后输出一个个（MapOutputKey/MapOutputValue)对，后台的输出线程会把输出的文件按照MapOutputKey把对应的MapOutputValue合并起来（MapOutputKey–&amp;gt;MapOutputValue0,MapOutputValue1,…)，同时还会将输出按照MapOutputKey排序（注意，每一个Map都会有同样的样的输出，不同的Map会有同样的Key值输出）。逻辑上，我们可以将不同Map输出的同一个Key的数据合起来看做一个小Partition（Finer Partition，FP）。&lt;/p&gt;
+
+&lt;h4 id=&quot;shuffle&quot;&gt;Shuffle&lt;/h4&gt;
+
+&lt;p&gt;Shuffle被称为Hadoop的核心，但是对应一般用户并不会涉及到这部分的细节。系统提供一个Partition接口使得用户可以决定Map的输出Key该如何聚合（比如想把Key为奇数的FP放在一起，把偶数放在一起）。Shffle的主要工作是将各个Map的FP的各部分按照用户指定的方式将数据从Map的输出端拷贝到对应的Reduce执行端。&lt;/p&gt;
+
+&lt;p&gt;在大多数研究中Shuffle的倾斜问题都没有具体考虑，事实上Shuffle这个过程本身也是存在倾斜问题的。主要原因是各个机器上运行的reduce任务的处理数据量的不均。各个机器上运行的Reduce都要从Map端拷贝相应数据，如果这些要拷贝的数据在本地的话那么必然会拷贝得快些（虽然对于本地数据Hadoop的Shuffle还是使用的Http协议向本地Servlet请求下载）；另一方面，一台机器上有多个Reduce在同时下载数据，这台机器的网卡速度及磁盘读写能力都成为这台机器上的Shuffle过程的瓶颈因素。&lt;/p&gt;
+
+&lt;p&gt;然而Shuffle这部分倾斜被忽略并不是没有道理的。从企业生产的角度，我们并不关心单个机器的处理时间、通信量。事实上我们最关注的是，对于提交任务的用户而言有最快的响应速度；对整个系统集群而言网络通信量最小，单位时间内处理的任务最多。Shuffle的倾斜问题是中间的一个过渡状态，它是由Map数据的输出不均、任务分配不均导致的；同时它也有可能导致最终Reduce的任务处理时间差异。Shuffle过程中的倾斜并不一定导致最终的倾斜，相反在有些推测执行任务出现的时候，Shuffle的不均有可能还会提升最终性能表现。&lt;/p&gt;
+
+&lt;p&gt;总之，Shuffle的均衡既不是目标，也不是高性能的必要条件，因此对于这部分的研究意义不大。&lt;/p&gt;
+
+&lt;h4 id=&quot;reduce&quot;&gt;Reduce&lt;/h4&gt;
+
+&lt;p&gt;Reduce将Map输出的各个FP拷贝到本地(拷贝过程中还是保证键值对的有序性)，然后对于每个键值对序列(ReduceInputKey–&amp;gt; ReduceInputValue0，ReduceInputValue1…)做处理。对于MapReduce模型本身，如果要保证计算的正确性，我认为至少要保证的是：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;单独一个键的FP必须要保证完整的拷贝到同一台机器上。而不是看起来的，同一个Hash值对应到的Partition的多个键的FP数据要保证到同一台机器上。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;多数计算中即使多个键的FP被Shuffle到同一台机器上，处理时我们还是每次以一个键的FP作为独立的计算输入单元。因此，我们在写MapReduce程序时，应当需要注意的是：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;不应当将程序计算的正确性依赖于Partition函数的实现，而只应将Partition函数作为一个提升系统数据均衡性的用户接口。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;上面这一点也是我们下面提出的各种负载均衡算法的基本依据。如果用户程序不满足上的条件，那么对于这种应用只能做Reduce任务分配级别的均衡，再低层的均衡会影响程序的正确性。而这种问题，Hadoop本身的推测执行机制基本能够满足需求，因此下文不做讨论。这也是均衡算法的能达到的上界(单个Key的FP是Reduce输入数据的最小不可分单元)。在此，下面都假设用户作业满足上面的条件。&lt;/p&gt;
+
+&lt;h2 id=&quot;结束语&quot;&gt;结束语&lt;/h2&gt;
+&lt;p&gt;本来准备继续写的，但是一篇博文过长感觉不太好，本文先到这里结束。文章简要介绍了负载均衡问题，并针对Hadoop平台上各个部分的运行机制分析了各个部分出现倾斜的情况。指出Hadoop平台上的负载均衡问题重点在Reduce部分。&lt;a href=&quot;/blog/analyzing-load-balancing-on-hadoop/&quot;&gt;下一篇将详细分析Hadoop倾斜发生的原因及解决方案&lt;/a&gt;。&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="load balance" /><category term="hadoop" /><category term="mapreduce" /><summary type="html">做了一段时间的Hadoop中的负载均衡问题，记下些流水账。</summary></entry><entry><title type="html">Java(JVM)内存类型详解 Java(JVM) Memory Types</title><link href="http://localhost:4000/blog/java-jvm-memory-types/" rel="alternate" type="text/html" title="Java(JVM)内存类型详解  Java(JVM) Memory Types" /><published>2014-11-07T22:46:35+08:00</published><updated>2014-11-07T22:46:35+08:00</updated><id>http://localhost:4000/blog/java-jvm-memory-types</id><content type="html" xml:base="http://localhost:4000/blog/java-jvm-memory-types/"></content><author><name>秦风汉雨</name></author><summary type="html"></summary></entry><entry><title type="html">Java为何不支持多继承 Why Multiple Inheritance is Not Supported in Java</title><link href="http://localhost:4000/blog/why-multiple-inheritance-is-not-supported-in-java/" rel="alternate" type="text/html" title="Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java" /><published>2014-11-06T21:43:11+08:00</published><updated>2014-11-06T21:43:11+08:00</updated><id>http://localhost:4000/blog/why-multiple-inheritance-is-not-supported-in-java</id><content type="html" xml:base="http://localhost:4000/blog/why-multiple-inheritance-is-not-supported-in-java/">&lt;p&gt;原文：http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/&lt;/p&gt;
+
+&lt;p&gt;James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思量。&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，&lt;strong&gt;多继承&lt;/strong&gt;，广泛的自动强制类型转换。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;java不支持多继承&quot;&gt;Java不支持多继承&lt;/h2&gt;
+&lt;hr /&gt;
+
+&lt;p&gt;首先给出论。Java到底支不支持多继承本身就是一个争议点。有人说Java支持多继承。&lt;strong&gt;不，Java中没有对多继承的支持&lt;/strong&gt;。如果你不相信我的话，把上面Java之父的那段话再读一下。&lt;/p&gt;
+
+&lt;p&gt;用接口支持多继承的说法是我们这些开发人员自己编造出来的。接口比实体类提供了更高的灵活性，我们可以选择用单个类去实现多个接口。这样我们通过继承两个模板来构建一个类。&lt;/p&gt;
+
+&lt;p&gt;这样做是在尝试向多继承靠近。其实我们做的是实现多个接口，却没有继承任何东西。实现一个类的接口的工作是向其中添加属性和方法，而不能直接从父类中获取具体实现。简单地说，Java中没有堆多继承的支持。
+&lt;!--more--&gt;
+##多继承 Multiple Inheritance&lt;/p&gt;
+
+&lt;p&gt;多继承是我们在一个类中继承多个类的属性和方法。C++，Common Lisp等是常见的流行编程语言中支持多继承的。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Multiple-Inheritance.png&quot; alt=&quot;Multiple-Inheritance&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;java为什么不支持多继承--why-java-does-not-support-multiple-inheritance&quot;&gt;Java为什么不支持多继承？  Why Java does not support multiple inheritance?&lt;/h2&gt;
+
+&lt;p&gt;现在我们确认了一点：Java不支持多继承。但是为什么？这是Java的创造者们做得决定。主要原因是两点：简洁、极少用到。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;简洁&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;我想分享下James Gosling给Java下的定义&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;Java：一个简单的，面向对象的，分布式的，解释的，健壮的，安全的，架构中立的，可移植的，高性能的，多线程的，动态的语言。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;看看这个优美的Java定义。这是现代软件开发语言应有的定义。这定义的第一个特性是什么？简单！&lt;/p&gt;
+
+&lt;p&gt;为了简洁这个目的应该是删除多继承最主要的原因。比如，我们可以考虑下下面这个多继承的菱形问题。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Diamond-Problem-of-Multiple-Inheritance.png&quot; alt=&quot;Diamond-Problem&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;有两个类B和C都继承自A。假设B和C都重载了继承自A的方法，并提供了它们各自不同的实现。现在有一各类D它用多继承同时继承了B、C。D应该继承那个重载的方法，但是使用的时候到底用的是哪个？B的，还是C的？这里不明确，会导致歧义。&lt;/p&gt;
+
+&lt;p&gt;C++中提供了额外的方法来规避这个陷阱。在Java中这个问题根本就不会出现。Java中即使一个类实现的多个接口里面有同样的方法，它也只会有一个这样的方法而且它会有自己的实现。类的动态加载机制使得实现多继承变得非常困难。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;很少使用&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Java已经投入使用很长时间了，有几次我们因为Java没有多继承而碰壁的？以我给人的经验来说，一次都没有！由于很少有场景需要多继承，再考虑到多继承带来的实现上的麻烦，多继承是可以安全的移出的。这样麻烦完全不值，因此Java选择了简洁的途径。&lt;/p&gt;
+
+&lt;p&gt;即使确实需要多继承时，我们也可以通过其他设计方法来达到要求。因此没有多继承Java照样可以工作得很好，而且不会带来其他问题，恐怕这也是不要多继承的原因之一。&lt;/p&gt;
+
+&lt;p&gt;对此，我的观点是，Java去除多继承并不是她的缺点而且对实现者来说会更简单。&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="basics" /><category term="java" /><summary type="html">原文：http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/</summary></entry><entry><title type="html">接口和抽象类的区别</title><link href="http://localhost:4000/blog/diference-between-interface-and-abstract-class/" rel="alternate" type="text/html" title="接口和抽象类的区别" /><published>2014-11-06T18:03:19+08:00</published><updated>2014-11-06T18:03:19+08:00</updated><id>http://localhost:4000/blog/diference-between-interface-and-abstract-class</id><content type="html" xml:base="http://localhost:4000/blog/diference-between-interface-and-abstract-class/">&lt;p&gt;面试过程中经常会被问道Java中接口和抽象类有什么区别，下面记了一些代码层面的差异。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;接口最主要的不同是，接口默认是抽象的，本身不能有任何实现。抽象类可以有为子类提供的默认实例方法。
+&lt;code class=&quot;highlighter-rouge&quot;&gt;Note: Java8 开始接口也可有默认实现了&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;接口中的变量默认是final的。抽象类可以包含非final的变量。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;接口的成员默认是public的。抽象类可以有任意类型的成员，private，protected都可以。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;实现接口需要用implements关键字。继承抽象类用extends关键字。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;接口继承一个或者多个接口，但是不能继承或实现任意抽象抑或者实体类。抽象类可以继承另外一个Java类同时还可以实现多个Java接口。这一有些关于&lt;a href=&quot;/blog/why-multiple-inheritance-is-not-supported-in-java&quot;&gt;为什么java类不支持多继承&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;一个Java类可以实现多个接口，但是只能继承一个抽象类。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;接口是完全抽象的，不能够实例化。抽象类也是不能被实例化的，但是如果其中有main()方法时，还是可以调用。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;和抽象类相比，接口定义的引用在具体执行时由于需要做额外的间接寻址工作因此会慢些。(执行时需要通过搜索具体类的实现方法)&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name>秦风汉雨</name></author><category term="basics" /><category term="java" /><summary type="html">面试过程中经常会被问道Java中接口和抽象类有什么区别，下面记了一些代码层面的差异。</summary></entry><entry><title type="html">深入理解重载和重写及与之相关的多态性 Overloading and overriding</title><link href="http://localhost:4000/blog/overloading-and-overriding/" rel="alternate" type="text/html" title="深入理解重载和重写及与之相关的多态性  Overloading and overriding" /><published>2014-11-05T16:03:56+08:00</published><updated>2014-11-05T16:03:56+08:00</updated><id>http://localhost:4000/blog/overloading-and-overriding</id><content type="html" xml:base="http://localhost:4000/blog/overloading-and-overriding/">&lt;p&gt;本文分割线之前非原创，翻译自&lt;a href=&quot;http://javapapers.com/core-java/overloading-and-overriding/&quot;&gt;Overloading and overriding&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;重载和重写除了在名称上有些相似之外，其实是完全不同的两个东西。&lt;/p&gt;
+
+&lt;p&gt;重载的目的是使得我们能够用用一个统一的接口名称来调用一系列方法。这些方法的目的也许是一样的，但是它们的实现方式会根据传入的参数不同而不同。&lt;/p&gt;
+
+&lt;p&gt;重写涉及到继承这个概念中的问题。子类继承了父类的方法，但是它可能需要有不同的操作行为，这时候就需要在子类中重写这个父类方法。&lt;/p&gt;
+
+&lt;p&gt;重载本身并不是多态，同时运行时绑定重载方法也不是多态的表现。它们以及一些其他的东西都是其面向对象多态性的使用（原文：All these and more are used to exercise the object oriented property polymorphism.总感觉翻译不要，故贴上来）。&lt;/p&gt;
+
+&lt;h2 id=&quot;重载和重写的关键点&quot;&gt;重载和重写的关键点&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;private： 一个私有的java方法是不能被重写的，因为它对子类压根就不可见&lt;/li&gt;
+  &lt;li&gt;final：重载一个final的方法是可以的，但是不能重写它，因此父类如果将方法声明为final的就可保证所有子类的调用此方法时调用的都是父类的方法。&lt;/li&gt;
+  &lt;li&gt;final：如果两个方法有同样的参数列表，而其中一个的参数被声明为final的这种情况下这两个方法完全一样，因此不可重载。编译都通不过，因为这两个方法被视为完全一样。&lt;/li&gt;
+  &lt;li&gt;static：可以重载一个静态的Java方法但是不能重写静态的Java方法，因为静态方法在方法区中只有一个。&lt;/li&gt;
+  &lt;li&gt;static：重载是关于对象(实例）和继承而言的。一个声明为静态的方法属于整个类(对于这个的所有对象都是一样的)。因此重写它没有任何意义。&lt;/li&gt;
+  &lt;li&gt;static：对于重载，两个静态方法的重载没有什么特别的，只不过是修饰符多了个static修饰符。参数列表依然必须不同。
+&lt;!--more--&gt;
+    &lt;h2 id=&quot;重载&quot;&gt;重载&lt;/h2&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;让我们来详细讨论下重载。在各种网站上我看到了大量的重载的例子。它们向类中添加更多的属性、方法，把它变得看起来更庞大作为重载的象征。事实上正确的方式是，当我们使用重载时外部看起来我们的类会变得更加紧凑。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;beforeoverloading.png&quot; alt=&quot;重载之前&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这里贴出来两个图片，第一张里面是印度的古典乐器脚踏式风琴，它是现代钢琴的鼻祖。另一幅图片是现代的电子琴。在我们的重载语境中，古典风琴是重载之前，电子琴是重载之后。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;afteroverloading.png&quot; alt=&quot;重载之后&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;java-example-for-method-overloading&quot;&gt;Java Example for Method Overloading&lt;/h3&gt;
+&lt;hr /&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class OverloadingExample {
+	public static void main(String args[]){
+		System.out.println(playMusic(&quot;C sharp&quot;,&quot;D sharp&quot;));
+		System.out.println(playMusic(&quot;C&quot;,&quot;D flat&quot;,&quot;E flat&quot;));
+	}
+	public static String playMusic(String c, String d){
+		return c+d;
+	}
+	public static String playMusic(String c, String d, String e){
+		return c+d+e;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;java-overloading-puzzle&quot;&gt;Java Overloading Puzzle&lt;/h3&gt;
+&lt;hr /&gt;
+ 	package com.javapapaer.java;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class NullArguementOverloading {
+	public static void main(String[] args) {
+		NullArguementOverloading obj = new NullArguementOverloading();
+		obj.overLoad(null);
+	}
+	private void overLoad(Object o){
+		System.out.println(&quot;Object o arguement method.&quot;);
+	}
+	private void overLoad(double[] dArray){
+		System.out.println(&quot;Double array argument method.&quot;);
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;猜一猜，上面的输出是啥？&lt;/p&gt;
+
+&lt;h3 id=&quot;overriding--重写&quot;&gt;Overriding  重写&lt;/h3&gt;
+&lt;hr /&gt;
+
+&lt;p&gt;当继承一个类的时候,根据父类方法的访问修饰符子类可以获得所有protect以上的父类方法。但是父类的方法的具体行为可能在子类中并不适合，因此我们需要根据子类对于这个方法的需求重写继承自父类的这个方法。重写后原来的旧方法对于这个子类会完全废弃。&lt;/p&gt;
+
+&lt;p&gt;看看下面这个猛兽皮卡，因为需求不同了，原来又小又旧的轮子被换成了巨无霸。这就是现实生活中的重写。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Overriding.png&quot; alt=&quot;Overriding&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;overriding-in-javajdk&quot;&gt;Overriding in Java/JDK&lt;/h3&gt;
+
+&lt;p&gt;在Java中默认所有对象都是继承自Object类。Object有个叫&lt;em&gt;equals&lt;/em&gt;的方法，在String类中重写了它的默认行为。String中通过比较传入的对象与本身保存的字符串序列一一对比看是否相等。&lt;/p&gt;
+
+&lt;h2 id=&quot;分割线&quot;&gt;#分割线～～～～～～～～～～～～～～～～～～～～～～～&lt;/h2&gt;
+&lt;p&gt;关于上面Overloading Puzzle，以免强迫症患者费心敲代码在此给出答案和解释。&lt;/p&gt;
+
+&lt;p&gt;程序输出：&lt;strong&gt;Double array argument method.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;原因是Java对于重载的处理有个最精确原则。Object和double[]都可以和null匹配，但是两者对比而言，double[]比Object匹配得更精确，所以调用了下面的overLoad方法。如果想让程序调用Object的overLoad方法则需要一个强制类型转换&lt;code class=&quot;highlighter-rouge&quot;&gt;obj.overLoad((Object)null);&lt;/code&gt;这样Object的overLoad就要比double[]的更精确,会输出&lt;em&gt;Object o arguement method.&lt;/em&gt;。&lt;/p&gt;
+
+&lt;p&gt;下面这段代码也许理解起来会更清晰一些，ArrayList继承自List：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import java.util.ArrayList;
+import java.util.List;
+
+public class OverridePuzzle {
+
+	private void overloadList(List list){
+		System.out.println(&quot;List arguement method.&quot;);
+	}
+
+	private void overloadList(ArrayList arrayList){
+		System.out.println(&quot;ArrayList arguement method&quot;);
+	}
+	public static void main(String[] args) {
+		OverridePuzzle op = new OverridePuzzle();
+		op.overloadList(null);
+	}
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;那么它将输出:&lt;strong&gt;ArrayList arguement method&lt;/strong&gt;，因为ArrayList比List匹配得更精确。&lt;/p&gt;
+
+&lt;p&gt;那又要问了，如果上文的NullArguementOverloading代码中还有个overLoad方法如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private void overLoad(String str) {
+	System.out.println(&quot;String argument method.&quot;);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;那么程序会怎样呢？答案是main函数&lt;code class=&quot;highlighter-rouge&quot;&gt;obj.overLoad(null)&lt;/code&gt;那一行会编译报错。String的overLoad和double[]的overLoad都可以匹配，但是两者在继承属上是平行的，因此编译器也不知道到底该调用哪一个重载方法。另外这段代码还说明了一个问题：重载是在编译期就已经确定了的，并不需要等到运行时才能确定。这也是为什么说它不是多态的一个原因。&lt;/p&gt;
+
+&lt;p&gt;还有下面一段代码作为佐证：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import java.util.ArrayList;
+import java.util.List;
+
+public class OverridePuzzle {
+
+	private void overloadList(List list){
+		System.out.println(&quot;List arguement method.&quot;);
+	}
+
+	private void overloadList(ArrayList arrayList){
+		System.out.println(&quot;ArrayList arguement method&quot;);
+	}
+	public static void main(String[] args) {
+		OverridePuzzle op = new OverridePuzzle();
+		List list = new ArrayList&amp;lt;String&amp;gt;();
+		op.overloadList(list);
+	}
+
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;程序输出：&lt;strong&gt;List arguement method.&lt;/strong&gt;。显然这里重载对于传入的参数类型只认了引用的类型，并没有去解析实际对象的类型。如果重载是一种多态的话，它这里应该去解析实际对象的类型并调用ArrayList的方法。&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="java" /><category term="basics" /><summary type="html">本文分割线之前非原创，翻译自Overloading and overriding.</summary></entry><entry><title type="html">Java垃圾回收机制四 Monitoring and Analyzing Java Garbage Collection</title><link href="http://localhost:4000/blog/monitoring-and-analyzing-java-garbage-collection/" rel="alternate" type="text/html" title="Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection" /><published>2014-11-05T13:20:34+08:00</published><updated>2014-11-05T13:20:34+08:00</updated><id>http://localhost:4000/blog/monitoring-and-analyzing-java-garbage-collection</id><content type="html" xml:base="http://localhost:4000/blog/monitoring-and-analyzing-java-garbage-collection/">&lt;p&gt;在这篇Java垃圾回收系列文章中，让我们看下一些监控和分析垃圾回收的工具。然后用工具尝试监控和分析一个例子。初学者最好先看下&lt;a href=&quot;/blog/tags#gc&quot;&gt;此系列&lt;/a&gt;,从&lt;a href=&quot;/blog/java-garbage-collection-introduction&quot;&gt;Java 垃圾回收简介&lt;/a&gt;开始吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;java垃圾回收监控和分析工具&quot;&gt;Java垃圾回收监控和分析工具&lt;/h2&gt;
+
+&lt;p&gt;下面是一些监控工具，它们有各自的优缺点。我们可以通过选择恰当的工具做一些有序的分析工作来提升应用性能。这篇文章将从Java VisualVM开始讲起。&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Java VisualVM&lt;/li&gt;
+  &lt;li&gt;Naarad&lt;/li&gt;
+  &lt;li&gt;GCViewer&lt;/li&gt;
+  &lt;li&gt;IBM Pattern Modeling and Analysis Tool for Java Garbage Collector&lt;/li&gt;
+  &lt;li&gt;HPjmeter&lt;/li&gt;
+  &lt;li&gt;IBM Monitoring and Diagnostic Tools for Java – Garbage Collection and Memory&lt;/li&gt;
+  &lt;li&gt;Visualizer&lt;/li&gt;
+  &lt;li&gt;Verbose GC Analyzer&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;java-visualvm&quot;&gt;Java VisualVM&lt;/h2&gt;
+&lt;p&gt;Java VisualVM是在Java SE SDK安装时免费提供的。看下你的Java JDK安装目录下的&lt;code class=&quot;highlighter-rouge&quot;&gt;/bin&lt;/code&gt;目录，&lt;code class=&quot;highlighter-rouge&quot;&gt;\Java\jdk1.8.0\bin&lt;/code&gt;。此目录下有许多其他工具包括javac和java工具，jvisualvm就是其中一个。
+&lt;!--more--&gt;
+Java VisualVM对运行中的Java应用提供了可视化的信息展示。它是很多工具的整合包，像工具JConsole,jstat,jinfo,jstack以及jmap现在都是Java VisualVM的一部分。&lt;/p&gt;
+
+&lt;p&gt;Java VisualVM可以用来&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;生成和分析堆内存的dump&lt;/li&gt;
+  &lt;li&gt;观察和操作MBeans&lt;/li&gt;
+  &lt;li&gt;监控垃圾回收&lt;/li&gt;
+  &lt;li&gt;内存和CPU性能分析&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;1-launch-visualvm&quot;&gt;1. Launch VisualVM&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;jvisualvm&lt;/code&gt;已经包含在了JDK的bin目录下,如果以设置环境变量path，则可以直接在命令行中运行&lt;code class=&quot;highlighter-rouge&quot;&gt;jvisualvm&lt;/code&gt;，将出现如下启动界面&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Start-Java-VisualVM.png&quot; alt=&quot;starting jvisualvm&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Java-VisualVM.png&quot; alt=&quot;jvisualvm view&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;2安装visual-gc插件&quot;&gt;2.安装Visual GC插件&lt;/h3&gt;
+&lt;p&gt;我们需要安装visual GC 插件才能有个堆Java GC线程的漂亮和有价值的视觉感受。在上面的启动界面中点击工具-&amp;gt;插件-&amp;gt;可用插件-&amp;gt;Visual GC&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Visual-GC-Plugin.png&quot; alt=&quot;visual gc&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;安装。&lt;/p&gt;
+
+&lt;h3 id=&quot;3-监控gc&quot;&gt;3. 监控GC&lt;/h3&gt;
+&lt;p&gt;现在可以监控&lt;a href=&quot;/blog/java-gc-management/&quot;&gt;垃圾回收&lt;/a&gt;过程了。开启你的Java应用程序，Java VisualVM会自动检测并将其显示到界面上。在左边“应用程序”面板的“本地”节点下面，所有本地运行的Java应用都会被列举出来。&lt;/p&gt;
+
+&lt;p&gt;Java VisualVM自己本身也是一个Java应用程序，因此它自身也被列了出来。作为本文的目的我们将监控VisualVM应用本身的GC过程。&lt;/p&gt;
+
+&lt;p&gt;双击“本地”节点下的VisualVM图标。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;GC-Analysis.jpg&quot; alt=&quot;visualvm gc&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这样应用程序的监控面板会在右边打开。面板上有多个标签，每个里面展示了与应用程序性能相关的方面。由于我们现在主要关注“Visual GC”，so，点之。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Heap-Memory-Space-Allocation.png&quot; alt=&quot;Heap Memory Space Allocation&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;上面的图片显示了Old，Eden，S0，S1使用的内存空间。下面的图表显示了各个部分申请和释放内存的详细信息。它以设定的刷新频率不停地跟新。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;GC-Graphs.png&quot; alt=&quot;gc graph&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;上图显示的是一个正常运行的程序。当发生内存泄露或者不正常的操作时，可以从图形本身明显地看出来。至少我们可以知道程序中存在和对象内存分配和垃圾回收相关的问题。然后利用其他标签如“Threads”中提供的信息和Thread Dump我们可以缩小发生问题的范围。&lt;/p&gt;
+
+&lt;p&gt;在“监视”标签中，我们可以看到以时间线发展的内存使用概况图。这里有个“执行垃圾回收”按钮可以调用垃圾回收过程。
+&lt;img src=&quot;Perform-GC.png&quot; alt=&quot;perform gc&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在“抽样器”标签中我们可以开始内存和CPU分析工作。抽样器会实时显示各个实例的使用情况。它可以帮助确定性能问题到底发生在哪里。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;Instances-Memory-Allocation.png&quot; alt=&quot;instance memory allocation&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;到此为止，关于&lt;a href=&quot;/blog/tags#gc&quot;&gt;Java 垃圾回收的系列文章&lt;/a&gt;已经完结了。&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="gc" /><category term="java" /><category term="jvm" /><summary type="html">在这篇Java垃圾回收系列文章中，让我们看下一些监控和分析垃圾回收的工具。然后用工具尝试监控和分析一个例子。初学者最好先看下此系列,从Java 垃圾回收简介开始吧。</summary></entry><entry><title type="html">Java垃圾回收机制三 Types of Java Garbage Collectors</title><link href="http://localhost:4000/blog/types-of-java-garbage-collectors/" rel="alternate" type="text/html" title="Java垃圾回收机制三  Types of Java Garbage Collectors" /><published>2014-11-05T11:07:33+08:00</published><updated>2014-11-05T11:07:33+08:00</updated><id>http://localhost:4000/blog/types-of-java-garbage-collectors</id><content type="html" xml:base="http://localhost:4000/blog/types-of-java-garbage-collectors/">&lt;p&gt;本文是Java垃圾回收系列的第三篇，非原创，翻译自&lt;a href=&quot;http://javapapers.com/java/types-of-java-garbage-collectors/&quot;&gt;Types of Java Garbage Collectors&lt;/a&gt;。如果没有相应基础的话，阅读本文前建议先阅读前两篇&lt;a href=&quot;/blog/java-garbage-collection-introduction/&quot;&gt;Java Garbage Collection Introduction&lt;/a&gt;(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和&lt;a href=&quot;/blog/java-gc-management/&quot;&gt;How Java Garbage Collection Works?&lt;/a&gt;(概况介绍了GC是如何工作的)&lt;/p&gt;
+
+&lt;p&gt;本文将会介绍各种不同类型的Java垃圾回收器。垃圾回收是Java用来将程序员从分配和释放内存的琐事中解放出来的自动过程。&lt;/p&gt;
+
+&lt;p&gt;Java有四种类型的垃圾回收器，&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/types-of-java-garbage-collectors/#serial-garbage-collector&quot;&gt;Serial Garbage Collector&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/types-of-java-garbage-collectors/#parallel-garbage-collector&quot;&gt;Parallel Garbage Collector&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/types-of-java-garbage-collectors/#cms-garbage-collector&quot;&gt;CMS Garbage Collector&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/types-of-java-garbage-collectors/#g1-garbage-collector&quot;&gt;G1 Garbage Collector&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;Types-of-Java-Garbage-Collectors3_th_thumb.jpg&quot; alt=&quot;各种类型的Java垃圾回收器&quot; /&gt;
+&lt;!--more--&gt;
+这四种类型的垃圾回收器都有各自的优点和缺点。最重要的是程序员可以选择JVM使用哪种类型的垃圾回收器。我们可以通过传递不同的JVM参数来设置使用哪一个。各个垃圾回收器在不同应用场景下的效率会有很大的差异。因此了解各种不同类型的垃圾回收器以及它们的应用场景是非常重要的。&lt;/p&gt;
+
+&lt;h2 id=&quot;1-serial-garbage-collector&quot;&gt;1. &lt;span id=&quot;serial-garbage-collector&quot;&gt;Serial Garbage Collector&lt;/span&gt;&lt;/h2&gt;
+
+&lt;p&gt;串行垃圾回收器控制所有的应用线程。它是为单线程场景设计的，只使用一个线程来执行垃圾回收工作。它暂停所有应用线程来执行垃圾回收工作的方式不适用于服务器的应用环境。它最适用的是简单的命令行程序。&lt;/p&gt;
+
+&lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;-XX:+UseSerialGC&lt;/code&gt;JVM参数来开启使用串行垃圾回收器。&lt;/p&gt;
+
+&lt;h2 id=&quot;2-parallel-garbage-collector&quot;&gt;2.&lt;span id=&quot;parallel-garbage-collector&quot;&gt; Parallel Garbage Collector&lt;/span&gt;&lt;/h2&gt;
+
+&lt;p&gt;并行垃圾回收器也称作基于吞吐量的回收器。它是JVM的默认垃圾回收器。与Serial不同的是，它使用多个线程来执行垃圾回收工作。和Serial回收器一样，它在执行垃圾回收工作是也需要暂停所有应用线程。&lt;/p&gt;
+
+&lt;h2 id=&quot;3-cms-garbage-collector&quot;&gt;3.&lt;span id=&quot;cms-garbage-collector&quot;&gt; CMS Garbage Collector&lt;/span&gt;&lt;/h2&gt;
+
+&lt;p&gt;并发标记清除(Concurrent Mark Sweep,CMS)垃圾回收器，使用多个线程来扫描堆内存并标记可被清除的对象，然后清除标记的对象。CMS垃圾回收器只在下面这两种情形下暂停工作线程，&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;在老年代中标记引用对象的时候&lt;/li&gt;
+  &lt;li&gt;在做垃圾回收的过程中堆内存中有变化发生&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;对比与并行垃圾回收器，CMS回收器使用更多的CPU来保证更高的吞吐量。如果我们可以有更多的CPU用来提升性能，那么CMS垃圾回收器是比并行回收器更好的选择。&lt;/p&gt;
+
+&lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;-XX:+UseParNewGC&lt;/code&gt;JVM参数来开启使用CMS垃圾回收器。&lt;/p&gt;
+
+&lt;h2 id=&quot;4-g1-garbage-collector&quot;&gt;4.&lt;span id=&quot;g1-garbage-collector&quot;&gt; G1 Garbage Collector&lt;/span&gt;&lt;/h2&gt;
+
+&lt;p&gt;G1垃圾回收器应用于大的堆内存空间。它将堆内存空间划分为不同的区域，对各个区域并行地做回收工作。G1在回收内存空间后还立即堆空闲空间做整合工作以减少碎片。CMS却是在全部停止(stop the world,STW)时执行内存整合工作。对于不同的区域G1根据垃圾的数量决定优先级。&lt;/p&gt;
+
+&lt;p&gt;使用&lt;code class=&quot;highlighter-rouge&quot;&gt;-XX:UseG1GC&lt;/code&gt;JVM参数来开启使用G1垃圾回收器。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Java 8 的优化&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;在使用G1垃圾回收器是，开启使用&lt;code class=&quot;highlighter-rouge&quot;&gt;-XX:+UseStringDeduplacaton&lt;/code&gt;JVM参数。它会通过把重复的String值移动到同一个char[]数组来优化堆内存占用。这是&lt;em&gt;Java 8 u 20&lt;/em&gt;引入的选项。&lt;/p&gt;
+
+&lt;p&gt;以上给出的四个Java垃圾回收器，在什么时候使用哪一个去决于应用场景，硬件配置和吞吐量要求。&lt;/p&gt;
+
+&lt;h2 id=&quot;garbage-collection-jvm-options&quot;&gt;Garbage Collection JVM Options&lt;/h2&gt;
+
+&lt;p&gt;下面是些主要的与Java垃圾回收相关的JVM选项。&lt;/p&gt;
+
+&lt;h3 id=&quot;type-of-garbage-collector-to-run&quot;&gt;Type of Garbage Collector to run&lt;/h3&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;选项&lt;/th&gt;
+      &lt;th&gt;描述&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:+UseSerialGC&lt;/td&gt;
+      &lt;td&gt;串行垃圾回收器&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:+UseParallelGC&lt;/td&gt;
+      &lt;td&gt;并行垃圾回收器&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:+UseConcMarkSweepGC&lt;/td&gt;
+      &lt;td&gt;CMS垃圾回收器&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:ParallesCMSThread=&lt;/td&gt;
+      &lt;td&gt;CMS垃圾回收器–使用的线程数量&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:UseG1GC&lt;/td&gt;
+      &lt;td&gt;G1垃圾回收器&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;gc-优化选项&quot;&gt;GC 优化选项&lt;/h3&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;选项&lt;/th&gt;
+      &lt;th&gt;描述&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-Xms&lt;/td&gt;
+      &lt;td&gt;初始堆内存大小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-Xmx&lt;/td&gt;
+      &lt;td&gt;最大堆内存大小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-Xmn&lt;/td&gt;
+      &lt;td&gt;年轻代的大小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:PermSize&lt;/td&gt;
+      &lt;td&gt;初始永久代的大小&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;-XX:MaxPermSize&lt;/td&gt;
+      &lt;td&gt;最大的永久代的大小&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;example-usage-of-jvm-gc-options&quot;&gt;Example Usage of JVM GC Options&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;java -Xmx12m -Xms3m -Xmn1m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar java-application.jar
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;在垃圾回收系列的&lt;a href=&quot;/blog/monitoring-and-analyzing-java-garbage-collection/&quot;&gt;下一篇&lt;/a&gt;中，将通过一个例子介绍如何区监控和分析垃圾回收。&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="gc" /><category term="java" /><category term="jvm" /><summary type="html">本文是Java垃圾回收系列的第三篇，非原创，翻译自Types of Java Garbage Collectors。如果没有相应基础的话，阅读本文前建议先阅读前两篇Java Garbage Collection Introduction(介绍了JVM的架构，堆内存模型和周边相关的Java术语)和How Java Garbage Collection Works?(概况介绍了GC是如何工作的)</summary></entry><entry><title type="html">Java垃圾回收机制一 简介–Java Garbage Collection Introduction</title><link href="http://localhost:4000/blog/java-garbage-collection-introduction/" rel="alternate" type="text/html" title="Java垃圾回收机制一  简介--Java Garbage Collection Introduction" /><published>2014-11-04T15:49:16+08:00</published><updated>2014-11-04T15:49:16+08:00</updated><id>http://localhost:4000/blog/java-garbage-collection-introduction</id><content type="html" xml:base="http://localhost:4000/blog/java-garbage-collection-introduction/">&lt;p&gt;本文非原创，翻译自&lt;a href=&quot;http://javapapers.com/java/java-garbage-collection-introduction/&quot;&gt;Java Garbage Collection introduction&lt;/a&gt;
+在Java中为对象分配和释放内存空间都是由垃圾回收线程自动执行完成的。和C语言不一样的是Java程序员不需要手动写垃圾回收相关的代码。这是使得Java如此流行，同时也是Java能帮助程序员写出更好的Java应用的优点之一。&lt;/p&gt;
+
+&lt;p&gt;计划写一个介绍Java垃圾回收基础的系列文章，共分四部分：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/java-garbage-collection-introduction/&quot;&gt;Java垃圾回收简介&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/java-gc-management/&quot;&gt;Java垃圾回收器是如何工作的？&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/types-of-java-garbage-collectors&quot;&gt;各种类型的Java垃圾回收器&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;/blog/monitoring-and-analyzing-java-garbage-collection&quot;&gt;Java垃圾回收的监控和分析&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;本文是这个系列的第一篇文章，这篇文章将会介绍一些基本术语，如：JDK，JVM，JRE，HotSpot VM，以及理解JVM的架构和Java堆内存结构。在开始学习Java垃圾回收机制之前确实有必要了解一下这些基本东西。&lt;/p&gt;
+
+&lt;h2 id=&quot;关键的java术语&quot;&gt;关键的Java术语&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Java API–一个帮助程序员创建Java应用的打包好的库集合&lt;/li&gt;
+  &lt;li&gt;Java Development Kit(JDK)–一个使得程序员能够开发Java应用的工具集合&lt;/li&gt;
+  &lt;li&gt;Java Virtual Machine(JVM)–JVM是一个抽象的计算机。Java程序是针对JVM规范写的。JVM是根据不同的操作系统平台实现的，它将Java指令翻译成对应平台上的指令，并执行。这样Java程序能够达到平台独立性。&lt;/li&gt;
+  &lt;li&gt;Java Runtime Environment(JRE)–JRE由一个JVM的实现和Java API组成。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;java-hotspot虚拟机&quot;&gt;Java HotSpot虚拟机&lt;/h2&gt;
+
+&lt;p&gt;每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并。
+&lt;!--more--&gt;
+HotSpot虚拟机是Oracle标准版平台的核心组成部分。在本垃圾回收系列文章中我们将通过HotSpot虚拟机来了解垃圾回收的基本准则。&lt;/p&gt;
+
+&lt;h2 id=&quot;jvm-架构&quot;&gt;JVM 架构&lt;/h2&gt;
+
+&lt;p&gt;下面的这幅图概括了一个JVM中的主要组成。在JVM架构中，堆内存和垃圾回收器这两个部分和垃圾回收相关。堆内存是运行时用来存储实例对象的数据空间，垃圾回收器运行在堆内存上。现在我们大概知道它们是怎样的一个工作模式。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;JVM-Architecture.jpg&quot; alt=&quot;JVM 架构图&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;java-堆内存&quot;&gt;Java 堆内存&lt;/h2&gt;
+&lt;p&gt;在Java的内存模型中，最重要的是要了解堆内存的概念。运行时的Java实例对象存储在堆内存空间中。当一个对象不再被引用了，它变成可被从堆内存中回收空间。在垃圾回收的过程中，这些对象将被从堆内存中清除，同时它们的空间也就被回收了。堆内存的空间主要分成了三部分，&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;年轻代&lt;/p&gt;
+
+    &lt;p&gt;a. Eden区(所有实例在运行时最初都分配到eden区中)
+ b. S0 Survivor Space(老一些的对象被从eden区移动到S0区，其实是eden区中的对象经过一次对eden区的Young GC还存活的对象被移动到S0)
+ c. S1 Survivor Space(再老一些的对象被从S0区移动到S1区，其实是在Young GC过程中S0区已满，则会将eden区中还存活的对象和S0区中的存活对象移动到S1区中)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;老年代(经过S0，S1中几轮迭代后还存活的对象被提升到老年代)&lt;/li&gt;
+  &lt;li&gt;永久代(包含一些元数据像类、方法等等)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;Java-Heap-Memory.jpg&quot; alt=&quot;Java堆内存空间&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;更新:永久代在Java8中被去掉了&lt;/em&gt;&lt;/p&gt;</content><author><name>秦风汉雨</name></author><category term="gc" /><category term="java" /><category term="jvm" /><summary type="html">本文非原创，翻译自Java Garbage Collection introduction 在Java中为对象分配和释放内存空间都是由垃圾回收线程自动执行完成的。和C语言不一样的是Java程序员不需要手动写垃圾回收相关的代码。这是使得Java如此流行，同时也是Java能帮助程序员写出更好的Java应用的优点之一。</summary></entry></feed>

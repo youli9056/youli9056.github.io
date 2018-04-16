@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop - Yuri's Blog</title>
+	<meta name="description" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/blog/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/blog/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/blog/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/blog/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#311e3e">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#311e3e">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/blog/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/blog/assets/css/main.css">
+</head>
+
+<body>
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+      </div>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+	  <li><a href="/blog/tags/#Tech">Tech</a></li>
+	  <li><a href="/blog/tags/#Life">Life</a></li>
+          <li><a href="/blog/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/blog/">秦风汉雨</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
+      </div>
+    </div>
+  </div>
+</header> <!-- End Header -->
+
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</h1>
+          <div class="page-date"><time datetime="2014-11-12 16:18:21 +0800">2014, Nov 12</time></div>
+        </div>
+        <p>在<a href="/blog/load-balancing-on-hadoop-mapreduce/">上一篇</a>中，简单介绍了<a href="/blog/load-balancing-on-hadoop-mapreduce/">负载均衡问题</a>，及其在Hadoop MapReduce平台中的表现。这里详细点，并介绍一些解决方案。</p>
+
+<h2 id="一倾斜类型">一、倾斜类型</h2>
+
+<ol>
+  <li>
+    <p>数据倾斜</p>
+
+    <p>输入数据分布不均，有些节点处理的数据远大于其他节点。可能会出现下面的情况，有个Join操作（reduce端join）输出数据量的大小</p>
+  </li>
+</ol>
+
+<p><img src="reducesidejoin.png" alt="reduce side join output" /></p>
+
+<ol>
+  <li>
+    <p>计算倾斜</p>
+
+    <p>运算的复杂度与输入的数据量关系不大，而取决于输入数据的特性。例如，PageRank这样的算法，一个节点的计算复杂度是于这个节点的出度有关，即使分配到一个计算节点上的数据相等，它们的实际运算时间由于度数的差别，还是会出现类似下图这样的情况。</p>
+  </li>
+</ol>
+
+<p><img src="computeunbalance.png" alt="compute unbalance" /></p>
+
+<h2 id="二解决方案">二、解决方案</h2>
+
+<p>两种倾斜方式中数据倾斜看起来会比较容易理解些，其实也是较易解决的。而计算倾斜发生得也很频繁，且情况更严重，解决起来也比较麻烦。解决方法整体上有两种分类：静态负载均衡，动态负载均衡。</p>
+
+<h3 id="21-静态负载均衡">2.1 静态负载均衡</h3>
+
+<p>严格意义上讲，静态负载均衡大多是进行算法优化，改变用户程序，使得整个作业的执行时间尽可能降低。这样的负载均衡一般都是需要对于当前的作业任务、输入数据特征和各个机器节点资源有先验知识。作业开始运行前，哪块数据在哪里进行计算都是可预测的，或者说是确定的，不管运行多少次都是这样一个状态。Hadoop提供的Partition接口就可以看做是一种静态负载均衡。下图展示了一个静态负载均衡的效果。</p>
+
+<p><img src="staticloadbalance.png" alt="static load banlance" /></p>
+
+<p>静态均衡很难用来解决计算倾斜的情形。大量的输入数据，想对每个分块的数据做计算量的估计是一个十分繁复且巨大的工作，而且没有通用性。</p>
+
+<h3 id="22-动态负载均衡">2.2 动态负载均衡</h3>
+
+<p>Hadoop平台中以Slot作为计算资源的分配单位，map任务和reduce任务都是运行在Slot上。Slot可以理解为单位计算资源，与cpu对应。由于存在数据倾斜或者计算倾斜每个任务的运行时间不同，可能会出现某个Slot已经完成任务空闲了，其他的Slot上还有大量的任务没有完成。显而易见，如果此时能够把其他Slot的任务放到这个Slot上来运行会大大提高系统的资源使用率，同时能够提升任务的处理效率及系统的吞吐量。相比于静态负载均衡，动态的均衡有多个优点。它不需要改变用户自己的应用代码，也不要针对不同的输入数据做算法定制优化，系统能够自动地完成均衡工作。</p>
+
+<p>动态均衡还有个优点，它可以用来解决计算倾斜的问题。动态均衡关注的是Slot的空闲与否，可以在运行时根据当前运行状况做出负载分配决策。</p>
+
+<p>相对而言动态均衡比静态均衡更难实现些，为了实现任务间的数据迁移工作需要增加任务间的数据传输模块及其他辅助功能。</p>
+
+<h3 id="23-关键技术">2.3 关键技术</h3>
+
+<p>负载均衡过程中涉及到三个基本问题：Which，Where，How。</p>
+
+<p>Which– 目前系统中哪个节点的任务被当做Straggler，谁的任务重，需要被迁移。</p>
+
+<p>Where– 系统中哪个节点任务轻，可以多承担些工作，将重的任务迁移到这里。</p>
+
+<p>How– Straggler节点的任务如何迁移到空闲节点中去，而且保证系统的一致性、正确性。</p>
+
+<p><strong>静态</strong></p>
+
+<p>静态Which：对输入数据进行采样，分析作业，估算每个部分的代价（归约到时间运行值）超出均值的那些块为Straggler。</p>
+
+<p>静态Where：估值低于均值的块为要迁移任务到的空闲点。</p>
+
+<p>静态How：类似背包问题，但分配目标是各个背包的估计代价方差最小。</p>
+
+<p><strong>动态</strong></p>
+
+<p>动态Which：目前系统中出现空Slot时，正在运行的task都可以作为Straggler。从其中挑选一个作为Straggler，如何挑选也是通过代价估计。</p>
+
+<p>动态Where：即当前空闲的Slot，将任务迁移到这个Slot。</p>
+
+<p>动态How：
+	A. 直接法：选择当前系统运行中task剩余时间最长的为Straggler，考虑迁移时间，使Straggler和空闲节点处理迁移任务的时间一致。
+	B. 迭代法：考虑系统I/O问题，选择当前在同一个机器上的剩余时间最长的task为straggler，切分一半计算量到空闲节点；本地不够分再向其他机器请求切分。</p>
+
+<p><img src="dynamicdemo.png" alt="dynamic demo" /></p>
+
+<p>大概就像这样。</p>
+
+<h2 id="三代价估计模型">三、代价估计模型</h2>
+
+<p>上面提到的两种方案都需要有个代价估计，一半都是以计算时间作为标量。我们一般使用代价估计模型将不同的应用及对应的数据来将具体的作业情况做代价估计。</p>
+
+<h3 id="31-map-task估计">3.1 Map task估计</h3>
+
+<h3 id="32-reduce-task估计">3.2 Reduce task估计</h3>
+
+<h3 id="33-具体设计">3.3 具体设计</h3>
+
+<p>这个坑挖了好久，已经想不起来该怎么填了。悔不当初。留下以当鞭戒！</p>
+
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/blog/tags#hadoop" class="tag">| hadoop</a>
+            
+            <a href="/blog/tags#load balance" class="tag">| load balance</a>
+            
+            <a href="/blog/tags#mapreduce" class="tag">| mapreduce</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop&url=http://localhost:4000/analyzing-load-balancing-on-hadoop/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://localhost:4000/analyzing-load-balancing-on-hadoop/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://localhost:4000/analyzing-load-balancing-on-hadoop/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/blog/assets/img/youli-face.jpg" alt="秦风汉雨" class="author-img">
+  <div class="author-desc">
+    <h2>秦风汉雨</h2>
+    <p>My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.</p>
+    <ul>
+      
+        <li class="email"><a href="mailto:youli9056@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+      
+        <li class="website"><a href="http://youli9056.github.io" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+    </ul>
+  </div>
+</section>
+
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
+    
+      
+        <a href="/blog/Spark-Best-Practice/" class="recent-item" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"><span>Spark 应用的常见性能考虑</span></a>
+      
+    
+      
+        <a href="/blog/analyzing-load-balancing-on-hadoop/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</span></a>
+      
+    
+      
+        <a href="/blog/load-balancing-on-hadoop-mapreduce/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</span></a>
+      
+    
+      
+        <a href="/blog/java-jvm-memory-types/" class="recent-item" style="background: url(/blog/assets/img/ice.jpg) center no-repeat; background-size: cover;"><span>Java(JVM)内存类型详解  Java(JVM) Memory Types</span></a>
+      
+    
+      
+        <a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="recent-item" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"><span>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</span></a>
+      
+    
+      
+        <a href="/blog/diference-between-interface-and-abstract-class/" class="recent-item" style="background: url(/blog/assets/img/cinecite.jpg) center no-repeat; background-size: cover;"><span>接口和抽象类的区别</span></a>
+      
+    
+      
+        <a href="/blog/overloading-and-overriding/" class="recent-item" style="background: url(/blog/assets/img/20180411.png) center no-repeat; background-size: cover;"><span>深入理解重载和重写及与之相关的多态性  Overloading and overriding</span></a>
+      
+    
+      
+        <a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="recent-item" style="background: url(/blog/assets/img/polar-lights.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</span></a>
+      
+    
+      
+        <a href="/blog/types-of-java-garbage-collectors/" class="recent-item" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制三  Types of Java Garbage Collectors</span></a>
+      
+    
+      
+        <a href="/blog/java-garbage-collection-introduction/" class="recent-item" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制一  简介--Java Garbage Collection Introduction</span></a>
+      
+    
+      
+        <a href="/blog/java-gc-management/" class="recent-item" style="background: url(/blog/assets/img/grass.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?</span></a>
+      
+    
+  </div>
+</div> <!-- End Recent-Box -->
+
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
+
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yuri.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
+  <div class="wrapper">
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; 秦风汉雨</p>
+  </div>
+</footer> <!-- End Footer -->
+
+</div>
+
+  <!-- JS -->
+<script src="/blog/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/blog/assets/js/jekyll-search.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/blog/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
+</script>
+<script src="/blog/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-55942851-1', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>
