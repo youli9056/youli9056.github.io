@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java - Yuri's Blog</title>
+	<meta name="description" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/blog/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/blog/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/blog/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/blog/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#311e3e">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#311e3e">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/blog/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/blog/assets/css/main.css">
+</head>
+
+<body>
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+      </div>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+	  <li><a href="/blog/tags/#Tech">Tech</a></li>
+	  <li><a href="/blog/tags/#Life">Life</a></li>
+          <li><a href="/blog/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/blog/">秦风汉雨</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
+      </div>
+    </div>
+  </div>
+</header> <!-- End Header -->
+
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</h1>
+          <div class="page-date"><time datetime="2014-11-06 21:43:11 +0800">2014, Nov 06</time></div>
+        </div>
+        <p>原文：http://javapapers.com/core-java/why-multiple-inheritance-is-not-supported-in-java/</p>
+
+<p>James Gosling 在95年二月发表的名为“Java: an Overview”的白皮书中给出了为什么Java不支持多继承的思量。</p>
+<blockquote>
+  <p>Java略去了好多C++中很少用到的，很难理解的，令人困惑的特性，根据我们的经验这些特性带来的麻烦比它们带来的好处更多。这些去掉的特征主要包括操作符重载(但是Java有方法重载)，<strong>多继承</strong>，广泛的自动强制类型转换。</p>
+</blockquote>
+
+<h2 id="java不支持多继承">Java不支持多继承</h2>
+<hr />
+
+<p>首先给出论。Java到底支不支持多继承本身就是一个争议点。有人说Java支持多继承。<strong>不，Java中没有对多继承的支持</strong>。如果你不相信我的话，把上面Java之父的那段话再读一下。</p>
+
+<p>用接口支持多继承的说法是我们这些开发人员自己编造出来的。接口比实体类提供了更高的灵活性，我们可以选择用单个类去实现多个接口。这样我们通过继承两个模板来构建一个类。</p>
+
+<p>这样做是在尝试向多继承靠近。其实我们做的是实现多个接口，却没有继承任何东西。实现一个类的接口的工作是向其中添加属性和方法，而不能直接从父类中获取具体实现。简单地说，Java中没有堆多继承的支持。
+<!--more-->
+##多继承 Multiple Inheritance</p>
+
+<p>多继承是我们在一个类中继承多个类的属性和方法。C++，Common Lisp等是常见的流行编程语言中支持多继承的。</p>
+
+<p><img src="Multiple-Inheritance.png" alt="Multiple-Inheritance" /></p>
+
+<h2 id="java为什么不支持多继承--why-java-does-not-support-multiple-inheritance">Java为什么不支持多继承？  Why Java does not support multiple inheritance?</h2>
+
+<p>现在我们确认了一点：Java不支持多继承。但是为什么？这是Java的创造者们做得决定。主要原因是两点：简洁、极少用到。</p>
+
+<p><strong>简洁</strong></p>
+
+<p>我想分享下James Gosling给Java下的定义</p>
+<blockquote>
+  <p>Java：一个简单的，面向对象的，分布式的，解释的，健壮的，安全的，架构中立的，可移植的，高性能的，多线程的，动态的语言。</p>
+</blockquote>
+
+<p>看看这个优美的Java定义。这是现代软件开发语言应有的定义。这定义的第一个特性是什么？简单！</p>
+
+<p>为了简洁这个目的应该是删除多继承最主要的原因。比如，我们可以考虑下下面这个多继承的菱形问题。</p>
+
+<p><img src="Diamond-Problem-of-Multiple-Inheritance.png" alt="Diamond-Problem" /></p>
+
+<p>有两个类B和C都继承自A。假设B和C都重载了继承自A的方法，并提供了它们各自不同的实现。现在有一各类D它用多继承同时继承了B、C。D应该继承那个重载的方法，但是使用的时候到底用的是哪个？B的，还是C的？这里不明确，会导致歧义。</p>
+
+<p>C++中提供了额外的方法来规避这个陷阱。在Java中这个问题根本就不会出现。Java中即使一个类实现的多个接口里面有同样的方法，它也只会有一个这样的方法而且它会有自己的实现。类的动态加载机制使得实现多继承变得非常困难。</p>
+
+<p><strong>很少使用</strong></p>
+
+<p>Java已经投入使用很长时间了，有几次我们因为Java没有多继承而碰壁的？以我给人的经验来说，一次都没有！由于很少有场景需要多继承，再考虑到多继承带来的实现上的麻烦，多继承是可以安全的移出的。这样麻烦完全不值，因此Java选择了简洁的途径。</p>
+
+<p>即使确实需要多继承时，我们也可以通过其他设计方法来达到要求。因此没有多继承Java照样可以工作得很好，而且不会带来其他问题，恐怕这也是不要多继承的原因之一。</p>
+
+<p>对此，我的观点是，Java去除多继承并不是她的缺点而且对实现者来说会更简单。</p>
+
+
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/blog/tags#basics" class="tag">| basics</a>
+            
+            <a href="/blog/tags#java" class="tag">| java</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java&url=http://localhost:4000/why-multiple-inheritance-is-not-supported-in-java/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://localhost:4000/why-multiple-inheritance-is-not-supported-in-java/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://localhost:4000/why-multiple-inheritance-is-not-supported-in-java/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/blog/assets/img/youli-face.jpg" alt="秦风汉雨" class="author-img">
+  <div class="author-desc">
+    <h2>秦风汉雨</h2>
+    <p>My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.</p>
+    <ul>
+      
+        <li class="email"><a href="mailto:youli9056@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+      
+        <li class="website"><a href="http://youli9056.github.io" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+    </ul>
+  </div>
+</section>
+
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
+    
+      
+        <a href="/blog/Spark-Best-Practice/" class="recent-item" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"><span>Spark 应用的常见性能考虑</span></a>
+      
+    
+      
+        <a href="/blog/analyzing-load-balancing-on-hadoop/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</span></a>
+      
+    
+      
+        <a href="/blog/load-balancing-on-hadoop-mapreduce/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</span></a>
+      
+    
+      
+        <a href="/blog/java-jvm-memory-types/" class="recent-item" style="background: url(/blog/assets/img/ice.jpg) center no-repeat; background-size: cover;"><span>Java(JVM)内存类型详解  Java(JVM) Memory Types</span></a>
+      
+    
+      
+        <a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="recent-item" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"><span>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</span></a>
+      
+    
+      
+        <a href="/blog/diference-between-interface-and-abstract-class/" class="recent-item" style="background: url(/blog/assets/img/cinecite.jpg) center no-repeat; background-size: cover;"><span>接口和抽象类的区别</span></a>
+      
+    
+      
+        <a href="/blog/overloading-and-overriding/" class="recent-item" style="background: url(/blog/assets/img/20180411.png) center no-repeat; background-size: cover;"><span>深入理解重载和重写及与之相关的多态性  Overloading and overriding</span></a>
+      
+    
+      
+        <a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="recent-item" style="background: url(/blog/assets/img/polar-lights.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</span></a>
+      
+    
+      
+        <a href="/blog/types-of-java-garbage-collectors/" class="recent-item" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制三  Types of Java Garbage Collectors</span></a>
+      
+    
+      
+        <a href="/blog/java-garbage-collection-introduction/" class="recent-item" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制一  简介--Java Garbage Collection Introduction</span></a>
+      
+    
+      
+        <a href="/blog/java-gc-management/" class="recent-item" style="background: url(/blog/assets/img/grass.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?</span></a>
+      
+    
+  </div>
+</div> <!-- End Recent-Box -->
+
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
+
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yuri.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
+  <div class="wrapper">
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; 秦风汉雨</p>
+  </div>
+</footer> <!-- End Footer -->
+
+</div>
+
+  <!-- JS -->
+<script src="/blog/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/blog/assets/js/jekyll-search.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/blog/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
+</script>
+<script src="/blog/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-55942851-1', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>

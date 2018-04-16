@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Java垃圾回收机制一  简介--Java Garbage Collection Introduction - Yuri's Blog</title>
+	<meta name="description" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta property="og:image" content="">
+	<link rel="shortcut icon" href="/blog/assets/img/favicon/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/blog/assets/img/favicon/apple-touch-icon.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/blog/assets/img/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/blog/assets/img/favicon/apple-touch-icon-114x114.png">
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#311e3e">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#311e3e">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#311e3e">
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="/blog/assets/fonts/font-awesome/css/font-awesome.min.css">
+	<!-- Styles -->
+	<link rel="stylesheet" href="/blog/assets/css/main.css">
+</head>
+
+<body>
+  <div class="flex-container">
+  <header class="main-header">
+  <div class="wrapper">
+    <div class="header-flex">
+      <div class="menu-icon-container">
+        <span class="menu-icon"><i class="fa fa-bars" aria-hidden="true"></i></span>
+      </div>
+      <nav class="main-nav">
+        <span class="menu-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+	  <li><a href="/blog/tags/#Tech">Tech</a></li>
+	  <li><a href="/blog/tags/#Life">Life</a></li>
+          <li><a href="/blog/about">About</a></li>
+        </ul>
+      </nav>
+      <p class="logo"><a href="/blog/">秦风汉雨</a></p>
+      <div class="search-icon-container">
+        <span class="search-icon"><a><i class="fa fa-search" aria-hidden="true"></i></a></span>
+      </div>
+    </div>
+  </div>
+</header> <!-- End Header -->
+
+  <article class="article-page">
+    <div class="page-image">
+      <div class="cover-image" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"></div>
+    </div>
+    <div class="wrapper">
+      <div class="page-content">
+        <div class="header-page">
+          <h1 class="page-title">Java垃圾回收机制一  简介--Java Garbage Collection Introduction</h1>
+          <div class="page-date"><time datetime="2014-11-04 15:49:16 +0800">2014, Nov 04</time></div>
+        </div>
+        <p>本文非原创，翻译自<a href="http://javapapers.com/java/java-garbage-collection-introduction/">Java Garbage Collection introduction</a>
+在Java中为对象分配和释放内存空间都是由垃圾回收线程自动执行完成的。和C语言不一样的是Java程序员不需要手动写垃圾回收相关的代码。这是使得Java如此流行，同时也是Java能帮助程序员写出更好的Java应用的优点之一。</p>
+
+<p>计划写一个介绍Java垃圾回收基础的系列文章，共分四部分：</p>
+
+<ol>
+  <li><a href="/blog/java-garbage-collection-introduction/">Java垃圾回收简介</a></li>
+  <li><a href="/blog/java-gc-management/">Java垃圾回收器是如何工作的？</a></li>
+  <li><a href="/blog/types-of-java-garbage-collectors">各种类型的Java垃圾回收器</a></li>
+  <li><a href="/blog/monitoring-and-analyzing-java-garbage-collection">Java垃圾回收的监控和分析</a></li>
+</ol>
+
+<p>本文是这个系列的第一篇文章，这篇文章将会介绍一些基本术语，如：JDK，JVM，JRE，HotSpot VM，以及理解JVM的架构和Java堆内存结构。在开始学习Java垃圾回收机制之前确实有必要了解一下这些基本东西。</p>
+
+<h2 id="关键的java术语">关键的Java术语</h2>
+<ul>
+  <li>Java API–一个帮助程序员创建Java应用的打包好的库集合</li>
+  <li>Java Development Kit(JDK)–一个使得程序员能够开发Java应用的工具集合</li>
+  <li>Java Virtual Machine(JVM)–JVM是一个抽象的计算机。Java程序是针对JVM规范写的。JVM是根据不同的操作系统平台实现的，它将Java指令翻译成对应平台上的指令，并执行。这样Java程序能够达到平台独立性。</li>
+  <li>Java Runtime Environment(JRE)–JRE由一个JVM的实现和Java API组成。</li>
+</ul>
+
+<h2 id="java-hotspot虚拟机">Java HotSpot虚拟机</h2>
+
+<p>每个JVM的实现在对垃圾回收的原理的实现方式上会有一些不同。在收购SUN之前Oracle有JRockit JVM，收购SUN之后有了HotSpot虚拟机。目前Oracle同时维护了这两个虚拟机，并宣称将来会将两个虚拟机合并。
+<!--more-->
+HotSpot虚拟机是Oracle标准版平台的核心组成部分。在本垃圾回收系列文章中我们将通过HotSpot虚拟机来了解垃圾回收的基本准则。</p>
+
+<h2 id="jvm-架构">JVM 架构</h2>
+
+<p>下面的这幅图概括了一个JVM中的主要组成。在JVM架构中，堆内存和垃圾回收器这两个部分和垃圾回收相关。堆内存是运行时用来存储实例对象的数据空间，垃圾回收器运行在堆内存上。现在我们大概知道它们是怎样的一个工作模式。</p>
+
+<p><img src="JVM-Architecture.jpg" alt="JVM 架构图" /></p>
+
+<h2 id="java-堆内存">Java 堆内存</h2>
+<p>在Java的内存模型中，最重要的是要了解堆内存的概念。运行时的Java实例对象存储在堆内存空间中。当一个对象不再被引用了，它变成可被从堆内存中回收空间。在垃圾回收的过程中，这些对象将被从堆内存中清除，同时它们的空间也就被回收了。堆内存的空间主要分成了三部分，</p>
+
+<ol>
+  <li>
+    <p>年轻代</p>
+
+    <p>a. Eden区(所有实例在运行时最初都分配到eden区中)
+ b. S0 Survivor Space(老一些的对象被从eden区移动到S0区，其实是eden区中的对象经过一次对eden区的Young GC还存活的对象被移动到S0)
+ c. S1 Survivor Space(再老一些的对象被从S0区移动到S1区，其实是在Young GC过程中S0区已满，则会将eden区中还存活的对象和S0区中的存活对象移动到S1区中)</p>
+  </li>
+  <li>老年代(经过S0，S1中几轮迭代后还存活的对象被提升到老年代)</li>
+  <li>永久代(包含一些元数据像类、方法等等)</li>
+</ol>
+
+<p><img src="Java-Heap-Memory.jpg" alt="Java堆内存空间" /></p>
+
+<p><em>更新:永久代在Java8中被去掉了</em></p>
+
+
+        <div class="page-footer">
+          <div class="page-tag">
+            <span>Tags:</span>
+            
+            <a href="/blog/tags#gc" class="tag">| gc</a>
+            
+            <a href="/blog/tags#java" class="tag">| java</a>
+            
+            <a href="/blog/tags#jvm" class="tag">| jvm</a>
+            
+          </div><!-- End Tags -->
+          <div class="page-share">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=Java垃圾回收机制一  简介--Java Garbage Collection Introduction&url=http://localhost:4000/java-garbage-collection-introduction/" title="Share on Twitter" rel="nofollow" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+            <a href="https://facebook.com/sharer.php?u=http://localhost:4000/java-garbage-collection-introduction/" title="Share on Facebook" rel="nofollow" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+            <a href="https://plus.google.com/share?url=http://localhost:4000/java-garbage-collection-introduction/" title="Share on Google+" rel="nofollow" target="_blank"><i class="fa fa-google" aria-hidden="true"></i></a>
+          </div><!-- End Share -->
+        </div>
+        <section class="author-box">
+  <img src="/blog/assets/img/youli-face.jpg" alt="秦风汉雨" class="author-img">
+  <div class="author-desc">
+    <h2>秦风汉雨</h2>
+    <p>My name is YouLi. I’m a software enginer at Amazon and an explorer of the world.</p>
+    <ul>
+      
+        <li class="email"><a href="mailto:youli9056@gmail.com"><i class="fa fa-envelope-o"></i></a></li>
+      
+      
+      
+        <li class="website"><a href="http://youli9056.github.io" target="_blank"><i class="fa fa-globe"></i></a></li>
+      
+      
+    </ul>
+  </div>
+</section>
+
+        <div class="recent-box">
+  <h2 class="recent-title">Recent post</h2>
+  <div class="recent-list">
+    
+      
+        <a href="/blog/Spark-Best-Practice/" class="recent-item" style="background: url(/blog/assets/img/dolphins.png) center no-repeat; background-size: cover;"><span>Spark 应用的常见性能考虑</span></a>
+      
+    
+      
+        <a href="/blog/analyzing-load-balancing-on-hadoop/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题二  详细分析及现有方案  Analyzing Load Balancing on Hadoop</span></a>
+      
+    
+      
+        <a href="/blog/load-balancing-on-hadoop-mapreduce/" class="recent-item" style="background: url(/blog/assets/img/elephants.png) center no-repeat; background-size: cover;"><span>Hadoop MapReduce中的负载均衡问题 Load Balancing on Hadoop MapReduce</span></a>
+      
+    
+      
+        <a href="/blog/java-jvm-memory-types/" class="recent-item" style="background: url(/blog/assets/img/ice.jpg) center no-repeat; background-size: cover;"><span>Java(JVM)内存类型详解  Java(JVM) Memory Types</span></a>
+      
+    
+      
+        <a href="/blog/why-multiple-inheritance-is-not-supported-in-java/" class="recent-item" style="background: url(/blog/assets/img/20180412.png) center no-repeat; background-size: cover;"><span>Java为何不支持多继承  Why Multiple Inheritance is Not Supported in Java</span></a>
+      
+    
+      
+        <a href="/blog/diference-between-interface-and-abstract-class/" class="recent-item" style="background: url(/blog/assets/img/cinecite.jpg) center no-repeat; background-size: cover;"><span>接口和抽象类的区别</span></a>
+      
+    
+      
+        <a href="/blog/overloading-and-overriding/" class="recent-item" style="background: url(/blog/assets/img/20180411.png) center no-repeat; background-size: cover;"><span>深入理解重载和重写及与之相关的多态性  Overloading and overriding</span></a>
+      
+    
+      
+        <a href="/blog/monitoring-and-analyzing-java-garbage-collection/" class="recent-item" style="background: url(/blog/assets/img/polar-lights.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制四  Monitoring and Analyzing Java Garbage Collection</span></a>
+      
+    
+      
+        <a href="/blog/types-of-java-garbage-collectors/" class="recent-item" style="background: url(/blog/assets/img/SolarStorm.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制三  Types of Java Garbage Collectors</span></a>
+      
+    
+      
+        <a href="/blog/java-garbage-collection-introduction/" class="recent-item" style="background: url(/blog/assets/img/cactus.jpeg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制一  简介--Java Garbage Collection Introduction</span></a>
+      
+    
+      
+        <a href="/blog/java-gc-management/" class="recent-item" style="background: url(/blog/assets/img/grass.jpg) center no-repeat; background-size: cover;"><span>Java垃圾回收机制二  工作原理--How Java Garbage Collection Works?</span></a>
+      
+    
+  </div>
+</div> <!-- End Recent-Box -->
+
+        <div class="newsletter" id="mc_embed_signup">
+  <h2 class="newsletter-title">Newsletter</h2>
+  <div class="form-container">
+    <p>Subscribe here to get our latest updates</p>
+    <form action="//" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+      <label class="screen-reader-text" for="mce-EMAIL">Email Address</label>
+      <div class="newsletter-box" id="mc_embed_signup_scroll">
+        <input type="email" name="EMAIL" placeholder="Email address" class="email-input" id="mce-EMAIL" required>
+        <input type="submit" value="Subscribe" name="subscribe" class="subscribe-btn" id="mc-embedded-subscribe">
+      </div>
+    </form>
+  </div>
+</div> <!-- End Newsletter -->
+
+        <section class="comment-area">
+  <div class="comment-wrapper">
+    
+    <div id="disqus_thread" class="article-comments"></div>
+    <script>
+      (function() {
+          var d = document, s = d.createElement('script');
+          s.src = '//yuri.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    
+  </div>
+</section> <!-- End Comment Area -->
+
+      </div>
+    </div> <!-- End Wrapper -->
+  </article>
+  <div class="search-box">
+  <div class="wrapper">
+    <div class="search-grid">
+      <form class="search-form">
+        <div id="search-container">
+          <input type="text" id="search-input" class="search" placeholder="Search">
+        </div>
+      </form>
+      <ul id="results-container" class="results-search"></ul>
+      <div class="icon-close-container">
+        <span class="search-icon-close"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="main-footer">
+  <div class="copyright">
+    <p>2018 &copy; 秦风汉雨</p>
+  </div>
+</footer> <!-- End Footer -->
+
+</div>
+
+  <!-- JS -->
+<script src="/blog/assets/js/jquery-3.2.1.min.js"></script>
+<script src="/blog/assets/js/jekyll-search.js"></script>
+<script>
+  SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/blog/search.json',
+    searchResultTemplate: '<li><a href="{url}" title="{desc}">{title}</a></li>',
+    noResultsText: 'No results found',
+    fuzzy: false,
+    exclude: ['Welcome']
+  });
+</script>
+<script src="/blog/assets/js/main.js"></script>
+
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-55942851-1', 'auto');
+  ga('send', 'pageview');
+</script> <!-- End Analytics -->
+
+</body>
+</html>
